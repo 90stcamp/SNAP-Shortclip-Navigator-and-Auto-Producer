@@ -1,0 +1,10 @@
+librosa
+soundfile
+evaluate
+datasets
+transformers
+accelerate
+jiwer
+tensorboard
+gradio
+ffmpeg
