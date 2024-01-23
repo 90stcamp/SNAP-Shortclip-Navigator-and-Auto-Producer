@@ -8,3 +8,6 @@ jiwer
 tensorboard
 gradio
 ffmpeg
+openai
+rouge
+nltk
