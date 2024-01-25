@@ -1,1 +1,5 @@
-{"data_path" : "ccdv/pubmed-summarization"}
+{
+    "data_name" : "ccdv/pubmed-summarization",
+    "model_name": "mistralai/Mistral-7B-v0.1",
+    "cache_dir":"/data/ephemeral/Youtube-Short-Generator"
+}
