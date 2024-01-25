@@ -2,3 +2,5 @@ __pycache__/
 .github/
 asset/
 key.json
+mistral
+filter_pubmed.csv
