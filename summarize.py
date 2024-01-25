@@ -1,4 +1,3 @@
-
 import pickle as pickle
 import pandas as pd
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -39,29 +38,46 @@ def make_prompt(title):
 
 def generate_output(input_text):
     # 모델에 따라 맞게 변형해서 사용하기
-    input_ids = tokenizer.encode(input_text, return_tensors='pt')
-    output = model.generate(input_ids, max_length=150, num_return_sequences=1)
+    inputs_idx = tokenizer.encode(input_text, return_tensors='pt')
+    
+    output = model.generate(inputs_idx, max_length=3000, num_return_sequences=1)
+
     generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
     return generated_text
 
 
 if __name__ == '__main__':
+    torch.cuda.empty_cache()
     dataset = load_dataset('ccdv/pubmed-summarization')
 
     MODEL_NAME = "mistralai/Mistral-7B-v0.1"
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+    cache_dir = "/data/ephemeral/Youtube-Short-Generator"
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device=torch.device("cpu")
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
+    tokenizer.pad_token_id = tokenizer.eos_token_id
+    model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
+    model.to(device)
 
     list_article, list_abstract, list_generated = [], [], []
-
-    for idx in tqdm(range(50)):
+    list_array=[]
+    ### length 순으로 sort, list_array는 임시 array
+    list_array=[]
+    for idx in range(len(dataset['train'])):
         article, abstract = dataset['train'][idx].values()
+        list_array.append([article, abstract])
+    list_array.sort(key=lambda x: len(x[0]))
+    ##########################
+
+    for idx in tqdm(range(3200,3500)):
+        article, abstract = list_array[idx]
         list_article.append(article)
         list_abstract.append(abstract)
 
         # 프롬프트에 원래 몇 문장인지 체크하고 n문장으로 생성해달라고 반영하기
-        num_sen = get_sententence_num(list_abstract[idx])
-        output = generate_output(make_prompt_with_sen(list_article[idx], num_sen))
+        num_sen = get_sententence_num(list_abstract[-1])
+        output = generate_output(make_prompt_with_sen(list_article[-1], num_sen))
 
         # 문장 수 반영없는 프롬프트
         # output=generate_output(make_prompt(list_article[idx]))
