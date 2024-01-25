@@ -25,12 +25,12 @@ def generate_output(input_text):
 if __name__ == '__main__':
     config = load_json(CONFIG_DIR)
     torch.cuda.empty_cache()
-    dataset = load_dataset(config['data_path'])
-
-    MODEL_NAME = "mistralai/Mistral-7B-v0.1"
-    cache_dir = "/data/ephemeral/Youtube-Short-Generator"
+    
+    dataset = load_dataset(config['data_name'])
+    MODEL_NAME = load_dataset(config['model_name'])
+    cache_dir = load_dataset(config['cache_dir'])
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # device=torch.device("cpu")
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
     tokenizer.pad_token_id = tokenizer.eos_token_id
