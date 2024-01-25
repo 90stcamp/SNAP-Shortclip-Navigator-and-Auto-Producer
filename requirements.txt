@@ -12,4 +12,5 @@ openai
 rouge
 nltk
 torch
+langchain
 
