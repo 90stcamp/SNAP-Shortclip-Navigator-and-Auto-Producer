@@ -4,8 +4,8 @@ from tqdm import tqdm
 from datasets import load_dataset
 
 
-from score import *
-from preprocess import *
+from utils.score import *
+from utils.preprocess import *
 
 
 def get_open_ai_key():
