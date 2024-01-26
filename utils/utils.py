@@ -1,4 +1,6 @@
 from settings import *
+import numpy as np 
+import matplotlib.pyplot as plt 
 import json
 from openai import OpenAI
 from datasets import load_dataset
@@ -39,3 +41,46 @@ def chat_api(client, message, system, user, model_name):
     response = json.loads(response)
     return response['choices'][0]['message']['content']
 
+
+
+def plot_scatter2D(dataframe, sampling=10_000, save=False, fname='scatter_plot'):
+    color_map = ['#8B0000', '#FF0000', '#BDB76B', '#7CFC00', '#008080', '#4169E1', '#FF69B4']
+    if sampling:
+        idx = np.random.randint(0, len(dataframe), sampling)    
+        samples = dataframe.iloc[idx]
+    else:
+        samples = dataframe.copy()
+    
+    x = samples.iloc[:, 0]
+    y = samples.iloc[:, 1]
+    label = samples.loc[:, 'label']
+    
+    fig = plt.figure(figsize=(9, 6))
+    ax = fig.subplots()
+    ax.scatter(x, y, color=label.apply(lambda x: color_map[x]), alpha=0.5)
+    
+    if save:
+        plt.savefig(os.path.join(FIG_DIR, f'{fname}.png'), dpi=200)
+    plt.show()
+    
+def plot_scatter3D(dataframe, sampling=10_000, save=False, fname='scatter_plot'):
+    color_map = ['#8B0000', '#FF0000', '#BDB76B', '#7CFC00', '#008080', '#4169E1', '#FF69B4']
+    if sampling:
+        idx = np.random.randint(0, len(dataframe), sampling)    
+        samples = dataframe.iloc[idx]
+    else:
+        samples = dataframe.copy()
+    
+    x = samples.iloc[:, 0]
+    y = samples.iloc[:, 1]
+    z = samples.iloc[:, 2]
+    label = samples.loc[:, 'label']
+    
+    fig = plt.figure(figsize=(9, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(x, y, z, color=label.apply(lambda x: color_map[x]), alpha=0.5)
+    
+    if save:
+        plt.savefig(os.path.join(FIG_DIR, f'{fname}.png'), dpi=200)
+    plt.show()
+    
