@@ -19,13 +19,13 @@ def client_set():
         )
     return client
 
-def load_data(data_path, type = 'train'):
+def load_data(data_path,lower = 1000, upper = 4000 ,type = 'train'):
     if not os.path.exists(os.path.join(BASE_DIR, 'filter_pubmed.csv')):
         pubmed = load_dataset(data_path, trust_remote_code=True)
         pubmed = pd.DataFrame(pubmed[type])
         pubmed = pubmed.dropna()
-        condition1 = pubmed['article'].map(lambda x: len(x)) > 1000
-        condition2 = pubmed['article'].map(lambda x: len(x)) < 4000
+        condition1 = pubmed['article'].map(lambda x: len(x)) > lower
+        condition2 = pubmed['article'].map(lambda x: len(x)) < upper
         pubmed = pubmed[condition1&condition2]
         pubmed.to_csv('filter_pubmed.csv', index = False)
         return pubmed
