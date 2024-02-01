@@ -2,7 +2,7 @@ __pycache__/
 .github/
 asset/
 key.json
-mistral
+models
 filter_pubmed.csv
 results
 statistic
