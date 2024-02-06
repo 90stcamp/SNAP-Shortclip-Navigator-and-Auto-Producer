@@ -1,5 +1,5 @@
 {
     "data_name" : "ccdv/pubmed-summarization",
-    "model_name": "mistralai/Mistral-7B-v0.1",
+    "model_name": "meta-llama/Llama-2-7b-chat-hf",
     "cache_dir":"/data/ephemeral/Youtube-Short-Generator"
 }
