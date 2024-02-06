@@ -49,7 +49,7 @@ def llm(doc):
     return response['text']
 
 
-def get_summarization(df,save_name, iter_num = 5):
+def get_summarization(df,save_name, lower, upper, iter_num = 5):
     for i in range(iter_num):
         response_list = []
         for idx in tqdm(range(len(df)), total = len(df)):
@@ -58,7 +58,7 @@ def get_summarization(df,save_name, iter_num = 5):
             if len(response) > 0:
                 response_list.append([response, df.iloc[idx, 1]])
         df = pd.DataFrame(response_list, columns = ['generate', 'abstract'])
-        df.to_csv(os.path.join(OUT_DIR, f"{save_name}_{i}.csv"), index = False)
+        df.to_csv(os.path.join(OUT_DIR, f"{save_name}_{lower}_{upper}_{i}.csv"), index = False)
 
 
 def get_score(save_name,lower,upper, n):
@@ -104,7 +104,8 @@ if __name__=='__main__':
     iter = args.iter_n
     save_name = args.save_name
     dataset = utils.load_data(config['data_name'],lower = lower, upper = upper)
-
+    if len(dataset) < n:
+        n = len(dataset)
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
     tokenizer.pad_token_id = tokenizer.eos_token_id
     model = AutoModelForCausalLM.from_pretrained(
@@ -120,5 +121,5 @@ if __name__=='__main__':
     hf = HuggingFacePipeline(pipeline=pipe)
 
     sample = dataset.sample(n)
-    result_df = get_summarization(sample, save_name, iter)
+    result_df = get_summarization(sample, save_name, lower, upper, iter)
     get_score(save_name, lower, upper, n)
