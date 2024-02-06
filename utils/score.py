@@ -33,7 +33,7 @@ def statistic_from_rouge_list(result_name):
     print('Rouge List: ', rouge_dic['values'])
     print(f"Mean :{mean}")
     print(f"Standard Deviation:{std}")
-    return mean, std
+
 
 
 def save_rouge_avg(avg_array, save_name):
