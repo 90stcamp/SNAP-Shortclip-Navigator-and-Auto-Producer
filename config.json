@@ -1,5 +1,8 @@
 {
     "data_name" : "ccdv/pubmed-summarization",
-    "model_name": "meta-llama/Llama-2-7b-chat-hf",
+    "model_name": [
+        "meta-llama/Llama-2-7b-chat-hf",
+        "princeton-nlp/Sheared-LLaMA-2.7B"
+    ],
     "cache_dir":"/data/ephemeral/Youtube-Short-Generator"
 }
