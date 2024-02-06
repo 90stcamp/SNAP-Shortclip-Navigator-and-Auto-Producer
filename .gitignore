@@ -3,6 +3,7 @@ __pycache__/
 asset/
 key.json
 models
-filter_pubmed.csv
+pubmed.csv
 results
 statistic
+project.ipynb
