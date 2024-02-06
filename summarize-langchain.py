@@ -7,8 +7,9 @@ from settings import *
 from utils import preprocess, prompt, score, utils
 import os 
 
-from langchain.llms import OpenAI
-from langchain import HuggingFaceHub, LLMChain
+from langchain.llms import OpenAI, HuggingFaceHub
+# from langchain import HuggingFaceHub
+from langchain.chains import LLMChain 
 from langchain.prompts import load_prompt, PromptTemplate
 from tqdm import tqdm
 
@@ -18,7 +19,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, Generati
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 import warnings
 warnings.filterwarnings("ignore")
-
+import argparse 
 import torch
 import numpy as np                                                              
 config = utils.load_json(CONFIG_DIR)
@@ -60,34 +61,61 @@ def get_summarization(df,save_name, iter_num = 5):
         df.to_csv(os.path.join(OUT_DIR, f"{save_name}_{i}.csv"), index = False)
 
 
-def get_score(save_name,lower,upper):
+def get_score(save_name,lower,upper, n):
     model_avg_rouge = score.get_rouge_list_from_all_df(save_name)
-    score.save_rouge_avg(model_avg_rouge, f'mistral_{lower}_{upper}')
+    print(model_avg_rouge)
+    score.save_rouge_avg(model_avg_rouge, f'{save_name}_{lower}_{upper}_{n}')
+    score.statistic_from_rouge_list(f'{save_name}_{lower}_{upper}_{n}_result.npy')
 
 
 if __name__=='__main__':
     torch.cuda.empty_cache()
-    MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
-    # MODEL_NAME = "meta-llama/Llama-2-7b-hf"
-    # MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf"
-
-    cache_dir = "/data/ephemeral/Youtube-Short-Generator/models/mistral"
-    # cache_dir = "/data/ephemeral/Youtube-Short-Generator/models/llama"
-    # cache_dir = "/data/ephemeral/Youtube-Short-Generator/models/llama_chat"
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--lower', required=True, type=int
+        )
+    parser.add_argument(
+        '--upper', required=True, type=int
+        )
+    parser.add_argument(
+        '--sample_n', required=True, type=int
+        )
+    parser.add_argument(
+        '--iter_n', default=3, type=int
+        )
+    parser.add_argument(
+        '--save_name', required=True, type=str
+        )
+    parser.add_argument(
+        '--max_new_token', default=100, type=int
+        )
+    args = parser.parse_args()
+    
+    # model_name in config.json
+    MODEL_NAME = config['model_name']
+    cache_dir = os.path.join(MODEL_DIR, args.save_name)
 
     # lower and upper bound for text length
-    lower,upper=2800,3200
-    dataset=get_dataset(lower, upper)
+    lower,upper=args.lower, args.upper
+    n = args.sample_n
+    iter = args.iter_n
+    save_name = args.save_name
+    dataset = utils.load_data(config['data_name'],lower = lower, upper = upper)
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
     tokenizer.pad_token_id = tokenizer.eos_token_id
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_NAME,
         cache_dir=cache_dir)
-    pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, max_new_tokens=150, device = 0, pad_token_id=tokenizer.eos_token_id)
+    pipe = pipeline(
+        "text-generation", 
+        model=model, 
+        tokenizer=tokenizer, 
+        max_new_tokens=args.max_new_token, 
+        device = 0, 
+        pad_token_id=tokenizer.eos_token_id)
     hf = HuggingFacePipeline(pipeline=pipe)
 
-    save_name = 'mist'
-    sample = dataset.sample(n=2)
-    result_df = get_summarization(sample, save_name, 3)
-    get_score(save_name, lower, upper)
+    sample = dataset.sample(n)
+    result_df = get_summarization(sample, save_name, iter)
+    get_score(save_name, lower, upper, n)
