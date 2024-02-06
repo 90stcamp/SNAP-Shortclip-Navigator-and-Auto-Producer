@@ -72,6 +72,9 @@ if __name__=='__main__':
     torch.cuda.empty_cache()
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        '--model_num', required=True, type=int
+        )
+    parser.add_argument(
         '--lower', required=True, type=int
         )
     parser.add_argument(
@@ -92,7 +95,7 @@ if __name__=='__main__':
     args = parser.parse_args()
     
     # model_name in config.json
-    MODEL_NAME = config['model_name']
+    MODEL_NAME = config['model_name'][args.model_num]
     cache_dir = os.path.join(MODEL_DIR, args.save_name)
 
     # lower and upper bound for text length
