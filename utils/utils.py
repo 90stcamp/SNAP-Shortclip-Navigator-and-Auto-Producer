@@ -5,7 +5,9 @@ import json
 from openai import OpenAI
 from datasets import load_dataset
 import pandas as pd
-
+from tqdm import tqdm
+import nltk
+from utils import preprocess
 
 def load_json(path):
     with open(path) as f:
@@ -20,15 +22,41 @@ def client_set():
     return client
 
 def load_data(data_path,lower = 1000, upper = 4000 ,type = 'train'):
-    if not os.path.exists(os.path.join(BASE_DIR, 'pubmed.csv')):
-        pubmed = load_dataset(data_path)
-        pubmed_df = pd.DataFrame(pubmed[type])
-        pubmed_df.to_csv('pubmed.csv', index = False)
-    pubmed = pd.read_csv('pubmed.csv')
-    pubmed = pubmed.dropna(axis = 0)
-    condition1 = pubmed['article'].map(lambda x: len(x)) > lower
-    condition2 = pubmed['article'].map(lambda x: len(x)) < upper
-    return pubmed[condition1 & condition2]
+    file_name = f"{data_path.split('/')[-1]}.csv"
+
+    if not os.path.exists(os.path.join(BASE_DIR, file_name)):
+        if file_name == 'cnn_dailymail.csv':
+            df = load_dataset(data_path, '2.0.0')
+        else: 
+            df = load_dataset(data_path)
+        df = pd.DataFrame(df[type])
+        rename_col_dic = {'article':'document', 'abstract': 'summary', 'highlights': 'summary'}
+        df.columns = [rename_col_dic[i] if i in rename_col_dic else i for i in df.columns]
+        df = df[['document', 'summary']]
+        df.to_csv(file_name, index = False)
+    
+    df = pd.read_csv(file_name)
+    df = df.dropna(axis = 0)
+    condition1 = df['document'].map(lambda x: len(x)) > lower
+    condition2 = df['document'].map(lambda x: len(x)) < upper
+
+    return df[condition1 & condition2]
+
+def dataset_word_statistic(data_name, lower, upper):
+    file_name = f"{data_name.split('/')[-1]}.csv"
+    print('Start Data Loading...')
+    df = load_data(data_name, lower = lower, upper = upper)
+    print('End Data Loading')
+    tqdm.pandas(desc="Doc,Sum Words Length Calculate...")
+    df_statistic = df.progress_applymap(lambda x: len(nltk.word_tokenize(x)))
+    doc_words, sum_words = df_statistic.mean()
+
+    tqdm.pandas(desc="Sum sentence length calculate...")
+    sum_sen_len = df['summary'].map(lambda x: preprocess.get_sententence_num(x)).sum()/ df.shape[0]
+    print(f'Dataset: {file_name}')
+    print(f'Doc Words: {doc_words}')
+    print(f'Sum Words: {sum_words}')
+    print(f'Sum Sentence Length: {sum_sen_len}')
 
 def chat_api(client, message, system, user, model_name):
     response = client.chat.completions.create(
