@@ -45,7 +45,7 @@ def load_data(data_path,lower = 1000, upper = 4000 ,type = 'train'):
 def dataset_word_statistic(data_name, lower, upper):
     file_name = f"{data_name.split('/')[-1]}.csv"
     print('Start Data Loading...')
-    df = load_data(data_name, lower = 0, upper = 3000)
+    df = load_data(data_name, lower = lower, upper = upper)
     print('End Data Loading')
     tqdm.pandas(desc="Doc,Sum Words Length Calculate...")
     df_statistic = df.progress_applymap(lambda x: len(nltk.word_tokenize(x)))
