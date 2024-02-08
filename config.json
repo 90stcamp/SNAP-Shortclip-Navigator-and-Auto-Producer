@@ -1,6 +1,6 @@
 {
     "data_name" : [
-        "pubmed",
+        "ccdv/pubmed-summarization",
         "EdinburghNLP/xsum",
         "cnn_dailymail",
         "webis/tldr-17"
@@ -8,8 +8,10 @@
     ],
     "model_name": [
         "meta-llama/Llama-2-7b-chat-hf",
-        "mistralai/Mistral-7B-Instruct-v0.2",
-        "princeton-nlp/Sheared-LLaMA-2.7B-ShareGPT"
+        "mistralai/Mistral-7B-Instruct-v0.2"
     ],
-    "cache_dir":"/data/ephemeral/Youtube-Short-Generator"
+    "cache_dir":[
+        "/data/ephemeral/Youtube-Short-Generator/llama2_chat",
+        "/data/ephemeral/Youtube-Short-Generator/mistral"
+    ]
 }
