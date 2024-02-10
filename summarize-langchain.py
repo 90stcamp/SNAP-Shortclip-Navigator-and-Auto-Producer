@@ -98,6 +98,7 @@ if __name__=='__main__':
     n = args.sample_n
     iter = args.iter_n
     save_name = args.save_name
+
     dataset = utils.load_data(config['data_name'][0], lower = lower, upper = upper)
     if len(dataset) < n:
         n = len(dataset)
