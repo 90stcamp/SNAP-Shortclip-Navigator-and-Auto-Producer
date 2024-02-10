@@ -25,12 +25,18 @@ def load_data(data_path,lower = 1000, upper = 4000 ,type = 'train'):
     file_name = f"{data_path.split('/')[-1]}.csv"
 
     if not os.path.exists(os.path.join(BASE_DIR, file_name)):
+        # CNN dataset: version issue
         if file_name == 'cnn_dailymail.csv':
             df = load_dataset(data_path, '2.0.0')
         else: 
             df = load_dataset(data_path)
-        df = pd.DataFrame(df[type])
-        rename_col_dic = {'article':'document', 'abstract': 'summary', 'highlights': 'summary'}
+
+        # Reddit dataset: time issue
+        if file_name == 'tldr-17.csv':
+            df = pd.DataFrame(df[type].select_columns(['content','summary']))
+        else:
+            df = pd.DataFrame(df[type])
+        rename_col_dic = {'article':'document','content': 'document','abstract': 'summary', 'highlights': 'summary'}
         df.columns = [rename_col_dic[i] if i in rename_col_dic else i for i in df.columns]
         df = df[['document', 'summary']]
         df.to_csv(file_name, index = False)
