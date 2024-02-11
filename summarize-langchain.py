@@ -40,7 +40,7 @@ def llm(len_sen,doc):
     return response['text']
 
 
-def get_summarization(df,save_name, lower, upper, iter_num = 5):
+def get_summarization(df,save_name, lower, upper, df_name, iter_num = 5):
     for i in range(iter_num):
         response_list = []
         for idx in tqdm(range(len(df)), total = len(df)):
@@ -49,7 +49,7 @@ def get_summarization(df,save_name, lower, upper, iter_num = 5):
             if len(response) > 0:
                 response_list.append([response, df.iloc[idx, 1]])
         df = pd.DataFrame(response_list, columns = ['generate', 'abstract'])
-        df.to_csv(os.path.join(OUT_DIR, f"{save_name}_{lower}_{upper}_{i}.csv"), index = False)
+        df.to_csv(os.path.join(OUT_DIR, f"{save_name}_{lower}_{upper}_{df_name}_{i}.csv"), index = False)
 
 
 def get_score(save_name,lower,upper, n):
@@ -91,7 +91,6 @@ if __name__=='__main__':
     
     # model_name in config.json
     MODEL_NAME = config['model_name'][args.model_num]
-    # cache_dir = os.path.join(MODEL_DIR, args.save_name)
     cache_dir = config['cache_dir'][args.model_num]
 
     # lower and upper bound for text length
@@ -118,5 +117,5 @@ if __name__=='__main__':
     hf = HuggingFacePipeline(pipeline=pipe)
 
     sample = dataset.sample(n)
-    result_df = get_summarization(sample, save_name, lower, upper, iter)
+    result_df = get_summarization(sample, save_name, lower, upper, config['data_name'][args.model_num],iter)
     get_score(save_name, lower, upper, n)
