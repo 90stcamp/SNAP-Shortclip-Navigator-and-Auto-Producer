@@ -39,6 +39,7 @@ def load_data(data_path,lower = 1000, upper = 4000 ,type = 'train'):
         rename_col_dic = {'article':'document','content': 'document','abstract': 'summary', 'highlights': 'summary'}
         df.columns = [rename_col_dic[i] if i in rename_col_dic else i for i in df.columns]
         df = df[['document', 'summary']]
+        df = df[df['document'] > df['summary']]
         df.to_csv(file_name, index = False)
     
     df = pd.read_csv(file_name)
