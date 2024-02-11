@@ -17,8 +17,9 @@ def get_rouge_from_df(generate_df, rouge_type = 'rouge-l', metric = 'f'):
         value += value_dic[rouge_type][metric]
     return value / len(df)
 
-def get_rouge_list_from_all_df(save_name):
-    file_list = [i for i in os.listdir(OUT_DIR) if save_name in i]
+def get_rouge_list_from_all_df(save_name, lower, upper, df_name):
+    find_file_name =  f"{save_name}_{lower}_{upper}_{df_name}"
+    file_list = [i for i in os.listdir(OUT_DIR) if '_'.join(i.split('_')[:-1]) == find_file_name]
     value_list = []
     for file in tqdm(file_list, desc = 'Get Rouge List From all Dataframe', total = len(file_list)):
         value = get_rouge_from_df(file)
