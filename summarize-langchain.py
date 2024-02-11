@@ -32,7 +32,7 @@ def get_dataset(lower,upper):
 
 
 def llm(len_sen,doc):
-    template=prompts.prompt_extsum_genbygpt()
+    template=prompts.prompt_extsum_paper2()
     prompt = PromptTemplate(template=template, input_variables=["len_sen","document"])
     llm_chain = LLMChain(prompt=prompt, llm=hf)
     response = llm_chain.invoke(input={"len_sen": len_sen, "document": doc})
@@ -91,7 +91,8 @@ if __name__=='__main__':
     
     # model_name in config.json
     MODEL_NAME = config['model_name'][args.model_num]
-    cache_dir = os.path.join(MODEL_DIR, args.save_name)
+    # cache_dir = os.path.join(MODEL_DIR, args.save_name)
+    cache_dir = config['cache_dir'][args.model_num]
 
     # lower and upper bound for text length
     lower,upper=args.lower, args.upper
