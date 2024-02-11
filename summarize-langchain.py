@@ -52,8 +52,8 @@ def get_summarization(df,save_name, lower, upper, df_name, iter_num = 5):
         df.to_csv(os.path.join(OUT_DIR, f"{save_name}_{lower}_{upper}_{df_name}_{i}.csv"), index = False)
 
 
-def get_score(save_name,lower,upper, n):
-    model_avg_rouge = scores.get_rouge_list_from_all_df(save_name)
+def get_score(save_name,lower,upper, df_name, n):
+    model_avg_rouge = scores.get_rouge_list_from_all_df(save_name, lower, upper, df_name)
     print(model_avg_rouge)
     scores.save_rouge_avg(model_avg_rouge, f'{save_name}_{lower}_{upper}_{n}')
     scores.statistic_from_rouge_list(f'{save_name}_{lower}_{upper}_{n}_result.npy')
