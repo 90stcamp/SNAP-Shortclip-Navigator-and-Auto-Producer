@@ -41,6 +41,7 @@ def llm(len_sen,doc):
 
 
 def get_summarization(df,save_name, lower, upper, df_name, iter_num = 5):
+    df_name = df_name.split('/')[-1]
     for i in range(iter_num):
         response_list = []
         for idx in tqdm(range(len(df)), total = len(df)):
@@ -53,10 +54,11 @@ def get_summarization(df,save_name, lower, upper, df_name, iter_num = 5):
 
 
 def get_score(save_name,lower,upper, df_name, n):
+    df_name = df_name.split('/')[-1]
     model_avg_rouge = scores.get_rouge_list_from_all_df(save_name, lower, upper, df_name)
     print(model_avg_rouge)
-    scores.save_rouge_avg(model_avg_rouge, f'{save_name}_{lower}_{upper}_{n}')
-    scores.statistic_from_rouge_list(f'{save_name}_{lower}_{upper}_{n}_result.npy')
+    scores.save_rouge_avg(model_avg_rouge, f'{save_name}_{lower}_{upper}_{df_name}_{n}')
+    scores.statistic_from_rouge_list(f'{save_name}_{lower}_{upper}_{df_name}_{n}_result.npy')
 
 
 if __name__=='__main__':
@@ -118,4 +120,4 @@ if __name__=='__main__':
 
     sample = dataset.sample(n)
     result_df = get_summarization(sample, save_name, lower, upper, config['data_name'][args.model_num],iter)
-    get_score(save_name, lower, upper, n)
+    get_score(save_name, lower, upper, config['data_name'][args.model_num],n)
