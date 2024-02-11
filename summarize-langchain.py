@@ -101,7 +101,7 @@ if __name__=='__main__':
     iter = args.iter_n
     save_name = args.save_name
 
-    dataset = utils.load_data(config['data_name'][0], lower = lower, upper = upper)
+    dataset = utils.load_data(config['data_name'][args.data_num], lower = lower, upper = upper)
     if len(dataset) < n:
         n = len(dataset)
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
@@ -119,5 +119,5 @@ if __name__=='__main__':
     hf = HuggingFacePipeline(pipeline=pipe)
 
     sample = dataset.sample(n)
-    result_df = get_summarization(sample, save_name, lower, upper, config['data_name'][args.model_num],iter)
-    get_score(save_name, lower, upper, config['data_name'][args.model_num],n)
+    result_df = get_summarization(sample, save_name, lower, upper, config['data_name'][args.data_num],iter)
+    get_score(save_name, lower, upper, config['data_name'][args.data_num],n)
