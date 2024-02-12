@@ -13,8 +13,11 @@ def get_rouge_from_df(generate_df, rouge_type = 'rouge-l', metric = 'f'):
     df = pd.read_csv(os.path.join(OUT_DIR, generate_df))   
     value = 0
     for idx, row in df.iterrows():
-        value_dic = get_Rouge_score(row['generate'], row['abstract'])
-        value += value_dic[rouge_type][metric]
+        try:
+            value_dic = get_Rouge_score(row['generate'], row['abstract'])
+            value += value_dic[rouge_type][metric]
+        except:
+            continue
     return value / len(df)
 
 def get_rouge_list_from_all_df(save_name, lower, upper, df_name):
