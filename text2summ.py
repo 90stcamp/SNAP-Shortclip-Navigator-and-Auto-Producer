@@ -40,7 +40,7 @@ def llm(len_sen,doc):
     return response['text']
 
 
-def get_summarization(df,save_name, lower, upper, df_name, iter_num = 5):
+def get_summarization_experiment(df,save_name, lower, upper, df_name, iter_num = 5):
     df_name = df_name.split('/')[-1]
     for i in range(iter_num):
         response_list = []
@@ -52,6 +52,13 @@ def get_summarization(df,save_name, lower, upper, df_name, iter_num = 5):
         df = pd.DataFrame(response_list, columns = ['generate', 'abstract'])
         df.to_csv(os.path.join(OUT_DIR, f"{save_name}_{lower}_{upper}_{df_name}_{i}.csv"), index = False)
 
+def get_summarization(sen):
+    response_list = []
+    len_sen=0
+    response = llm(len_sen, sen)
+    if len(response) > 0:
+        response_list.append([response, sen])
+    return response_list
 
 def get_score(save_name,lower,upper, df_name, n):
     df_name = df_name.split('/')[-1]
@@ -119,5 +126,5 @@ if __name__=='__main__':
     hf = HuggingFacePipeline(pipeline=pipe)
 
     sample = dataset.sample(n)
-    result_df = get_summarization(sample, save_name, lower, upper, config['data_name'][args.data_num],iter)
+    result_df = get_summarization_experiment(sample, save_name, lower, upper, config['data_name'][args.data_num],iter)
     get_score(save_name, lower, upper, config['data_name'][args.data_num],n)
