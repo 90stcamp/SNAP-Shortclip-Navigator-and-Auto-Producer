@@ -1,7 +1,10 @@
 from transformers import AutoProcessor, pipeline, AutoModelForSpeechSeq2Seq
 import librosa 
 import argparse 
+import spacy
 
+
+nlp = spacy.load("en_core_web_sm")
 
 MODEL_DICT = {
     'wav2vec': 'facebook/wav2vec2-base-960h', 
@@ -18,11 +21,27 @@ parser.add_argument(
     '--model_name', required=True, type=str
 )
 
+def get_sentence_timestamps(result):
+    doc = nlp(result['text'])
+    sentences = [sent.text for sent in doc.sents]
+    timestamps, words = [], result['chunks']
+    count=0
+
+    for sen in sentences:
+        listWords = sen.split()
+        for i in range(len(listWords)):
+            timestamp = words[count]['timestamp'][0]
+            if i == 0:
+                start_time = timestamp
+            end_time = words[count]['timestamp'][1]
+            count+=1
+        timestamps.append((sen, start_time, end_time))
+    return timestamps
+
 
 def convertAudio2Text(sample):
     processor = AutoProcessor.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='/data/ephemeral/Youtube-Short-Generator/models')
     model = AutoModelForSpeechSeq2Seq.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='/data/ephemeral/Youtube-Short-Generator/models').to('cuda:0')
-    
     
     pipe = pipeline(
         "automatic-speech-recognition",
@@ -31,12 +50,14 @@ def convertAudio2Text(sample):
         feature_extractor=processor.feature_extractor,
         max_new_tokens=128,
         chunk_length_s=30,
+        return_timestamps="word",
         device='cuda:0'
     )
     
     output = pipe(sample)
+    timestamps=get_sentence_timestamps(output)
 
-    return output
+    return output['text'], timestamps
 
 
 if __name__ == '__main__':
