@@ -31,7 +31,6 @@ def convertAudio2Text(sample):
         feature_extractor=processor.feature_extractor,
         max_new_tokens=128,
         chunk_length_s=30,
-        return_timestamps='word',
         device='cuda:0'
     )
     
