@@ -1,5 +1,11 @@
 
 #### 
 
-- Short videos have become increasingly popular in recent years due to the rise of social media platforms
-  - Ghosh, R., Goyal, T., Agarwal, V., Bagdi, A., & Singh, A. (2023, April). Envisioning a Hybrid Recommendation System for Filtering the Content from Short Videos. In 2023 7th International Conference on Trends in Electronics and Informatics (ICOEI) (pp. 1661-1666). IEEE.
+
+- Envisioning a Hybrid Recommendation System for Filtering the Content from Short Videos
+  - Short videos have become increasingly popular in recent years due to the rise of social media platforms
+- Fast video shot transition localization with deep structured models
+- Understanding the Characteristics of Internet Short Video Sharing: YouTube as a Case Study
+  - YouTube has become the most successful Internet site providing a new generation of short video sharing services.
+- Understanding the Characteristics of Internet Short Video Sharing: A YouTube-Based Measurement Study
+  - YouTube, now enjoys more than 6 billion videos watched every month 
