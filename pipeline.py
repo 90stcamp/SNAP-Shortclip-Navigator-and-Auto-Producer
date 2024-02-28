@@ -34,7 +34,7 @@ if __name__ == '__main__':
     script, timestamps = convertAudio2Text(sample)
 
     MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
-    cache_dir = "/data/ephemeral/Youtube-Short-Generator/models/mistral"
+    cache_dir = "models/mistral"
     
     logging.info("Text Summarization Process")
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
@@ -52,8 +52,9 @@ if __name__ == '__main__':
     hf = HuggingFacePipeline(pipeline=pipe)
 
     response_list = []
+    # To set len_sen=0 and script 
     len_sen=0
-    response = input_llm(len_sen, script)
+    response = input_llm(len_sen, script[:3000])
     if len(response) > 0:
         response_list.append([response, script])
     print(response_list)
