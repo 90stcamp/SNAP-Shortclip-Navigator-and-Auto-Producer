@@ -40,8 +40,8 @@ def get_sentence_timestamps(result):
 
 
 def convertAudio2Text(sample):
-    processor = AutoProcessor.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='/data/ephemeral/Youtube-Short-Generator/models')
-    model = AutoModelForSpeechSeq2Seq.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='/data/ephemeral/Youtube-Short-Generator/models').to('cuda:0')
+    processor = AutoProcessor.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='models')
+    model = AutoModelForSpeechSeq2Seq.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='models').to('cuda:0')
     
     pipe = pipeline(
         "automatic-speech-recognition",
