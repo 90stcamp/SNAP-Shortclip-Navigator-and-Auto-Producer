@@ -1,10 +1,11 @@
 import librosa 
 import logging
-
+import pickle
 from youtube2audio import downloadYouTube, convertVideo2Audio
 from text2summ import *
 from audio2text import convertAudio2Text
-
+from top_k_text import top_k_text
+from cut_video import cut_video
 
 def input_llm(len_sen,doc):
     template=prompts.prompt_extsum_paper2()
@@ -57,5 +58,8 @@ if __name__ == '__main__':
     response = input_llm(len_sen, script[:3000])
     if len(response) > 0:
         response_list.append([response, script])
-    print(response_list)
+    ##
+    text =[timestamps,response]
+    candidates = top_k_text(text,60,3,1) #shorts길이 , Top K , candidates 간격
 
+    cut_video(video_dir,candidates)
