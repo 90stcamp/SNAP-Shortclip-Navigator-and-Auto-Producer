@@ -1,28 +1,19 @@
 import logging
 import pickle
 import librosa
+import json
 
 from youtube2audio import downloadYouTube, convertVideo2Audio
 from text2summ import *
 from audio2text import convertAudio2Text
-from utils import scores, videoedit, crawlers
-
-
-def input_llm(len_sen,doc):
-    template=prompts.prompt_extsum_paper2()
-    prompt = PromptTemplate(template=template, input_variables=["len_sen","document"])
-    llm_chain = LLMChain(prompt=prompt, llm=hf)
-    response = llm_chain.invoke(input={"len_sen": len_sen, "document": doc})
-    torch.cuda.empty_cache()
-    return response['text']
+from utils import scores, videoedit, crawlers, domainflow
 
 
 if __name__ == '__main__':
     logging.basicConfig(format='(%(asctime)s) %(levelname)s:%(message)s',
-                    datefmt ='%m/%d %I:%M:%S %p',
-                    level=logging.INFO)
+                    datefmt ='%m/%d %I:%M:%S %p', level=logging.INFO)
     logging.info("Process Started")
-    youtube_link='https://www.youtube.com/watch?v=KrLj6nc516A'
+    youtube_link='https://www.youtube.com/watch?v=6_PI1l5NKL8'
     video_dir=youtube_link.split('watch?v=')[1]
     category=crawlers.get_youtube_category(youtube_link)
     logging.info(f"Video Category: {category}")
@@ -35,34 +26,22 @@ if __name__ == '__main__':
     logging.info("Loading Audio Process")
     sample, sampling_rate = librosa.load(f'videos/{video_dir}.mp3')    
     logging.info("Audio to Text Process")
-    script, timestamps = convertAudio2Text(sample)
+    script, timestamps = convertAudio2Text(sample,video_dir)
 
-    MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
-    cache_dir = "models/mistral"
-    
+    with open(f'videos/{video_dir}.json', 'r', encoding='utf-8') as json_file:
+        output = json.load(json_file)
+    script, timestamps = output['text'][3001:6000], output['chunks']
+
     logging.info("Text Summarization Process")
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
-    tokenizer.pad_token_id = tokenizer.eos_token_id
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL_NAME,
-        cache_dir=cache_dir)
-    pipe = pipeline(
-        "text-generation", 
-        model=model, 
-        tokenizer=tokenizer, 
-        max_new_tokens=100, 
-        device = 0, 
-        pad_token_id=tokenizer.eos_token_id)
-    hf = HuggingFacePipeline(pipeline=pipe)
-
-    response_list = []
+    response_list=[]
     # To set len_sen=0 and script 
-    len_sen=0
-    response = input_llm(len_sen, script[:3000])
+    response=domainflow.separate_to_domain(category,script)
     if len(response) > 0:
         response_list.append([response, script])
     text =[timestamps,response]
 
-    logging.info("Summ-Text top-k retrieval Process")
-    candidates = scores.top_k_text(text,60,3,1) #shorts길이 , Top K , candidates 간격
-    videoedit.cut_video(video_dir,candidates)
+    # print(response)
+    # logging.info("Summ-Text top-k retrieval Process")
+    # candidates = scores.top_k_text(text,60,3,1) #shorts길이 , Top K , candidates 간격
+    # videoedit.cut_video(video_dir,candidates)
+
