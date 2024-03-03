@@ -2,8 +2,9 @@ from transformers import AutoProcessor, pipeline, AutoModelForSpeechSeq2Seq
 import librosa 
 import argparse 
 import spacy
-from whisper_jax import FlaxWhisperPipline
-import jax.numpy as jnp
+import json
+# from whisper_jax import FlaxWhisperPipline
+# import jax.numpy as jnp
 
 import gc
 import torch
@@ -43,10 +44,14 @@ def get_sentence_timestamps(result):
     return timestamps
 
 
-def convertAudio2Text(sample):
+def save_text_json(output,video_dir):
+    with open(f'videos/{video_dir}.json', 'w', encoding='utf-8') as json_file:
+        json.dump(output, json_file, indent=4)
+
+def convertAudio2Text(sample,video_dir):
     processor = AutoProcessor.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='models')
     model = AutoModelForSpeechSeq2Seq.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='models').to('cuda:0')
-    
+
     pipe = pipeline(
         "automatic-speech-recognition",
         model=model,
@@ -56,19 +61,16 @@ def convertAudio2Text(sample):
         chunk_length_s=30,
         device='cuda:0'
     )
-    
+
     output = pipe(sample, return_timestamps=True)
-    timestamps=get_sentence_timestamps(output)
+    save_text_json(output,video_dir)
+    return output['text'], output['chunks']
 
-    return output['text'], timestamps
-
-
-def convertAudio2TextJax(audio_path):
-    video_path=audio_path.replace('mp4','mp3')
-    sample, sampling_rate = librosa.load(video_path)
+def convertAudio2TextJax(sample,video_dir):
     pipeline=FlaxWhisperPipline("openai/whisper-large-v2", dtype=jnp.float16)
     result=pipeline(sample, return_timestamps=True)
-    return result
+    save_text_json(output,video_dir)
+    return result['text'], result['chunks']
 
 
 def flush():
@@ -76,16 +78,16 @@ def flush():
     torch.cuda.empty_cache()
 
 
-# for default
-if __name__ == '__main__':
-    sample, sampling_rate = librosa.load('videos/6Pm0Mn0-jYU&ab_channel=CNBCMakeIt.mp3')    
-    output = convertAudio2Text(sample)
-    print(output)
+# # for default
+# if __name__ == '__main__':
+#     sample, sampling_rate = librosa.load('videos/6Pm0Mn0-jYU&ab_channel=CNBCMakeIt.mp3')    
+#     output = convertAudio2Text(sample)
+#     print(output)
 
 
 # for whisper jax
-# if __name__ == '__main__':
-#     flush()
-#     output = convertAudio2TextJax('videos/6Pm0Mn0-jYU&ab_channel=CNBCMakeIt.mp3')
-#     print(output)
+if __name__ == '__main__':
+    flush()
+    output = convertAudio2TextJax('videos/6Pm0Mn0-jYU&ab_channel=CNBCMakeIt.mp3')
+    print(output)
 
