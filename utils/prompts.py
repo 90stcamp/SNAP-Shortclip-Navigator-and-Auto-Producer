@@ -81,3 +81,39 @@ def prompt_extsum_genbygpt():
     Document: {document}<>[/INST]<\s>.
     """
     return template
+
+def prompt_entertain_pick():
+    """
+    Domain Summary for entertainment
+    """
+    template="""
+    <s>[INST]<> Find the entertaining moment in this script and return it.
+
+    Document: {document}<>[/INST]<\s>.
+    """
+    return template
+
+def prompt_comedy_pick():
+    """
+    Domain Summary for entertainment
+    """
+    template="""
+    <s>[INST]<> Find the funniest moment in this script and return it.
+
+    Document: {document}<>[/INST]<\s>.
+    """
+    return template
+
+def prompt_retrieval():
+    """
+    Domain Summary for entertainment
+    """
+    template="""
+    <s>[INST]<> Find the most appropriate parts in document with given explanation.
+    Return original sentences of document.
+
+    Document: {document} explanation:{pick}<>[/INST]<\s>.
+    """
+    return template
+
+
