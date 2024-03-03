@@ -1,9 +1,11 @@
-import librosa 
 import logging
+import pickle
+import librosa
 
 from youtube2audio import downloadYouTube, convertVideo2Audio
 from text2summ import *
 from audio2text import convertAudio2Text
+from utils import scores, videoedit, crawlers
 
 
 def input_llm(len_sen,doc):
@@ -20,8 +22,10 @@ if __name__ == '__main__':
                     datefmt ='%m/%d %I:%M:%S %p',
                     level=logging.INFO)
     logging.info("Process Started")
-    youtube_link='https://www.youtube.com/watch?v=6Pm0Mn0-jYU&ab_channel=CNBCMakeIt'
+    youtube_link='https://www.youtube.com/watch?v=KrLj6nc516A'
     video_dir=youtube_link.split('watch?v=')[1]
+    category=crawlers.get_youtube_category(youtube_link)
+    logging.info(f"Video Category: {category}")
 
     logging.info("Video Download Process")
     downloadYouTube(youtube_link, f_name=video_dir)
@@ -57,5 +61,10 @@ if __name__ == '__main__':
     response = input_llm(len_sen, script[:3000])
     if len(response) > 0:
         response_list.append([response, script])
-    print(response_list)
+    text =[timestamps,response]
+
+    logging.info("Summ-Text top-k retrieval Process")
+    candidates = scores.top_k_text(text,60,3,1) #shorts길이 , Top K , candidates 간격
+    videoedit.cut_video(video_dir,candidates)
+
 
