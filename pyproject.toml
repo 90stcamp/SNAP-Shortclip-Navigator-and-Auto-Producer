@@ -37,6 +37,7 @@ beautifulsoup4 = "*"
 selenium = "*"
 rouge-score = "*"
 
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

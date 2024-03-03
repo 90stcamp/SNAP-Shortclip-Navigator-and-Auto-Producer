@@ -66,5 +66,3 @@ if __name__ == '__main__':
     logging.info("Summ-Text top-k retrieval Process")
     candidates = scores.top_k_text(text,60,3,1) #shorts길이 , Top K , candidates 간격
     videoedit.cut_video(video_dir,candidates)
-
-
