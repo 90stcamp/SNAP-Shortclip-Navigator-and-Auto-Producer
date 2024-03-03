@@ -11,7 +11,7 @@
         "mistralai/Mistral-7B-Instruct-v0.2"
     ],
     "cache_dir":[
-        "/data/ephemeral/Youtube-Short-Generator/models/llama2_chat",
-        "/data/ephemeral/Youtube-Short-Generator/models/mistral"
+        "../models/llama2_chat",
+        "../Youtube-Short-Generator/models/mistral"
     ]
 }
