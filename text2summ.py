@@ -1,7 +1,7 @@
 from datasets import load_dataset
 import pandas as pd
 from rouge import Rouge
-from openai import OpenAI
+# from openai import OpenAI
 import json
 from settings import *
 from utils import preprocess, prompts, scores, utils
@@ -30,15 +30,13 @@ def get_dataset(lower,upper):
     df = utils.load_data(config['data_name'],lower = lower, upper = upper)
     return df
 
-
-def llm(len_sen,doc):
+def input_llm(len_sen,doc):
     template=prompts.prompt_extsum_paper2()
     prompt = PromptTemplate(template=template, input_variables=["len_sen","document"])
     llm_chain = LLMChain(prompt=prompt, llm=hf)
     response = llm_chain.invoke(input={"len_sen": len_sen, "document": doc})
     torch.cuda.empty_cache()
     return response['text']
-
 
 def get_summarization_experiment(df,save_name, lower, upper, df_name, iter_num = 5):
     df_name = df_name.split('/')[-1]
@@ -52,20 +50,28 @@ def get_summarization_experiment(df,save_name, lower, upper, df_name, iter_num =
         df = pd.DataFrame(response_list, columns = ['generate', 'abstract'])
         df.to_csv(os.path.join(OUT_DIR, f"{save_name}_{lower}_{upper}_{df_name}_{i}.csv"), index = False)
 
-def get_summarization(sen):
-    response_list = []
-    len_sen=0
-    response = llm(len_sen, sen)
-    if len(response) > 0:
-        response_list.append([response, sen])
-    return response_list
-
 def get_score(save_name,lower,upper, df_name, n):
     df_name = df_name.split('/')[-1]
     model_avg_rouge = scores.get_rouge_list_from_all_df(save_name, lower, upper, df_name)
     print(model_avg_rouge)
     scores.save_rouge_avg(model_avg_rouge, f'{save_name}_{lower}_{upper}_{df_name}_{n}')
     scores.statistic_from_rouge_list(f'{save_name}_{lower}_{upper}_{df_name}_{n}_result.npy')
+
+def summarize_langchain(input, template):
+    MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
+    cache_dir = "models"
+
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
+    model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
+    pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, 
+        max_new_tokens=100, device = 0, pad_token_id=tokenizer.eos_token_id)
+    hf = HuggingFacePipeline(pipeline=pipe)
+
+    prompt = PromptTemplate(template=template, input_variables=["len_sen","document"])
+    llm_chain = LLMChain(prompt=prompt, llm=hf)
+    response = llm_chain.invoke(input=input)
+    torch.cuda.empty_cache()
+    return response
 
 
 if __name__=='__main__':
