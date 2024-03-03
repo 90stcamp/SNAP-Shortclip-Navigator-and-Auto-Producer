@@ -2,9 +2,12 @@ from transformers import AutoProcessor, pipeline, AutoModelForSpeechSeq2Seq
 import librosa 
 import argparse 
 import spacy
+from whisper_jax import FlaxWhisperPipline
+import jax.numpy as jnp
 
+import gc
+import torch
 
-nlp = spacy.load("en_core_web_sm")
 
 MODEL_DICT = {
     'wav2vec': 'facebook/wav2vec2-base-960h', 
@@ -22,6 +25,7 @@ parser.add_argument(
 )
 
 def get_sentence_timestamps(result):
+    nlp = spacy.load("en_core_web_sm")
     doc = nlp(result['text'])
     sentences = [sent.text for sent in doc.sents]
     timestamps, words = [], result['chunks']
@@ -50,17 +54,38 @@ def convertAudio2Text(sample):
         feature_extractor=processor.feature_extractor,
         max_new_tokens=128,
         chunk_length_s=30,
-        return_timestamps="word",
         device='cuda:0'
     )
     
-    output = pipe(sample)
+    output = pipe(sample, return_timestamps=True)
     timestamps=get_sentence_timestamps(output)
 
     return output['text'], timestamps
 
 
+def convertAudio2TextJax(audio_path):
+    video_path=audio_path.replace('mp4','mp3')
+    sample, sampling_rate = librosa.load(video_path)
+    pipeline=FlaxWhisperPipline("openai/whisper-large-v2", dtype=jnp.float16)
+    result=pipeline(sample, return_timestamps=True)
+    return result
+
+
+def flush():
+    gc.collect()
+    torch.cuda.empty_cache()
+
+
+# for default
 if __name__ == '__main__':
-    sample, sampling_rate = librosa.load('videos/bbc_news.mp3')    
+    sample, sampling_rate = librosa.load('videos/6Pm0Mn0-jYU&ab_channel=CNBCMakeIt.mp3')    
     output = convertAudio2Text(sample)
-    
+    print(output)
+
+
+# for whisper jax
+# if __name__ == '__main__':
+#     flush()
+#     output = convertAudio2TextJax('videos/6Pm0Mn0-jYU&ab_channel=CNBCMakeIt.mp3')
+#     print(output)
+
