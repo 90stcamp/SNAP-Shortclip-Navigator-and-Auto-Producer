@@ -42,6 +42,21 @@ def reduce_prompt():
     """
     return template
 
+#557.711 s
+# def map_prompt():
+#     template="""
+#     <s>[INST]<>Find the highlight scene or scoring specific scene of the match in this script and return it.
+
+#     Document: {document}<>[/INST]<\s>.
+#     """
+#     return template
+
+# def reduce_prompt():
+#     template = """
+#     <s>[INST]<>Please pick out the top five scenes that could be the most important highlight specific scene or scoring scene from various parts of the script.
+#     highlight scene: {ext_sum}<>[/INST]<\s>.
+#     """
+#     return template
 
 def create_map_reduce_chain():
     map_template = PromptTemplate(
@@ -88,11 +103,12 @@ def my_tokenizer_func(text):
 
 def get_sum(text):
     torch.cuda.empty_cache()
-    text_splitter = CharacterTextSplitter(
+    text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
+        # tokenizer = tokenizer,
         separator= '\n',
         chunk_size = args.chunk_size,
         chunk_overlap = args.chunk_overlap,
-        length_function = my_tokenizer_func,
+        # length_function = my_tokenizer_func,
     )
     chain = create_map_reduce_chain()
     split_docs = text_splitter.create_documents([text])
@@ -117,15 +133,15 @@ if __name__=='__main__':
     parser.add_argument(
         '--chunk_overlap', default=100, type=int
         )
+    parser.add_argument(
+        '--save_path', required=True, type=str
+        )
     args = parser.parse_args()
 
     print("Load model and Setting pipline...")
     with timer('Summarization'):
         MODEL_NAME = config['model_name'][args.model_num]
         cache_dir = config['cache_dir'][args.model_num]
-        # MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
-        # cache_dir = "../Youtube-Short-Generator/models/mistral"
-
 
         tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
         tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -154,5 +170,5 @@ if __name__=='__main__':
         print('Summarization Start...')
         summarize_text = get_sum(text)
         print('Summarization End...')
-        with open('./summarize_result.txt', 'w') as f:
+        with open(args.save_path, 'w') as f:
             f.write(summarize_text)
