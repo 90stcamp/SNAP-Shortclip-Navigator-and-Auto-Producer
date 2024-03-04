@@ -11,3 +11,5 @@ pubmed-summarization.csv
 xsum.csv
 cnn_dailymail.csv
 tldr-17.csv
+*.txt
+*.ipynb
