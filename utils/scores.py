@@ -49,17 +49,21 @@ def save_rouge_avg(avg_array, save_name):
         raise
 
 def top_k_text(text, shorts_time =60,k = 3 ,interval = 1):
+    """
+    #shorts길이 , Top K , candidates 간격
+    """
+    print(text)
     candidates = [] #쇼츠 후보군들
     # shorts_time = 60 #쇼츠후보들의 초수
     # k = 3            #몇개의 후보를 선정할건지
     # interval = 1     #몇개의 문장을 기준으로 나눌껀지
 
     for i in range(0,len(text[0]),interval):
-        start = text[0][i][1]       #시작시간
-        temptext = text[0][i][0]    #첫문장
+        start = text[0][i]['timestamp'][0]       #시작시간
+        temptext = text[0][i]['text']    #첫문장
         for j in range(i+1,len(text[0])):
-            end = text[0][j][2]     #끝나는시간
-            temptext= ' '.join([temptext,text[0][j][0]])
+            end = text[0][j]['timestamp'][1]     #끝나는시간
+            temptext= ' '.join([temptext,text[0][j]['timestamp'][0]])
             if end-start>shorts_time:
                 break               #계속 합치다가 60초가 넘어가면 break
         candidates.append([temptext,start,end]) #60초동안의 문장,시작시간,끝나는시간 저장

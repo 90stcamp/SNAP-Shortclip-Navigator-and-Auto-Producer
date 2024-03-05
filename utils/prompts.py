@@ -95,10 +95,32 @@ def prompt_entertain_pick():
 
 def prompt_comedy_pick():
     """
-    Domain Summary for entertainment
+    Domain Summary for comedy
     """
     template="""
     <s>[INST]<> Find the funniest moment in this script and return it.
+
+    Document: {document}<>[/INST]<\s>.
+    """
+    return template
+
+def prompt_sports_pick():
+    """
+    Domain Summary for sports
+    """
+    template="""
+    <s>[INST]<> Find the highlight scene of the match in this script and return it.
+
+    Document: {document}<>[/INST]<\s>.
+    """
+    return template
+
+def prompt_game_pick():
+    """
+    Domain Summary for game
+    """
+    template="""
+    <s>[INST]<> Find the exciting scene of the gameplay in this script and return it.
 
     Document: {document}<>[/INST]<\s>.
     """
@@ -117,3 +139,12 @@ def prompt_retrieval():
     return template
 
 
+def prompt_reduce_entertain_pick():
+    """
+    Reduce prompt for entertainment to pick top scenes
+    """
+    template = """
+    <s>[INST]<>Please pick out the top five scenes that could be the most entertaining moments or 'hot clips' from various parts of the script.
+    Entertaining Moments: {ext_sum}<>[/INST]<\s>.
+    """
+    return template
