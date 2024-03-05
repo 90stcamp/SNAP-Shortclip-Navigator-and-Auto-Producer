@@ -6,6 +6,8 @@ API_KEY = os.path.join(BASE_DIR, 'key.json')
 OUT_DIR = os.path.join(BASE_DIR, 'results')
 STATS_DIR = os.path.join(BASE_DIR, 'statistic')
 MODEL_DIR = os.path.join(BASE_DIR, 'models')
+SUMM_DIR = os.path.join(BASE_DIR, 'summ_result')
+
 if not os.path.exists(OUT_DIR):
     os.mkdir(OUT_DIR)
 
@@ -14,3 +16,6 @@ if not os.path.exists(STATS_DIR):
     
 if not os.path.exists(MODEL_DIR):
     os.mkdir(MODEL_DIR)
+
+if not os.path.exists(SUMM_DIR):
+    os.mkdir(SUMM_DIR)
