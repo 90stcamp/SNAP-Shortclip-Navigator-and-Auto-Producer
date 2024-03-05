@@ -112,7 +112,7 @@ if __name__=='__main__':
                 results.append(future.result())
 
         reduce_template = PromptTemplate(
-            template=prompts.prompt_entertaining_map(),
+            template=prompts.prompt_entertaining_reduce(),
             input_variables=["document"]
             )
         reduce_chain = LLMChain(llm=hf, prompt=reduce_template) 
