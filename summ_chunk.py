@@ -154,7 +154,7 @@ if __name__=='__main__':
         print(len(tokenizer.tokenize(reduce_target)))
 
         ## 긴 영상에 대해 어떻게 처리할지(MLB 3:08:58 기준: 6649 토큰 -> CUDA Error)
-        # reduce_result = reduce_chain.invoke(reduce_target)['text']
+        reduce_result = reduce_chain.invoke(reduce_target)['text']
 
         with open(os.path.join(SUMM_DIR, f"result/{args.save_name}.txt"), 'w') as f:
-            f.write(reduce_target)
+            f.write(reduce_result)
