@@ -48,28 +48,23 @@ def save_rouge_avg(avg_array, save_name):
         print('기존 파일이 존재합니다. 다른 save_name을 설정해주세요.')
         raise
 
-def top_k_text(text, shorts_time =60,k = 3 ,interval = 1):
+def top_k_text(text,shorts_time=60, k=3, interval=1):
     """
-    #shorts길이 , Top K , candidates 간격
+    #shorts title length, Top K , How many sentences
     """
-    print(text)
-    candidates = [] #쇼츠 후보군들
-    # shorts_time = 60 #쇼츠후보들의 초수
-    # k = 3            #몇개의 후보를 선정할건지
-    # interval = 1     #몇개의 문장을 기준으로 나눌껀지
-
+    candidates = []
     for i in range(0,len(text[0]),interval):
-        start = text[0][i]['timestamp'][0]       #시작시간
-        temptext = text[0][i]['text']    #첫문장
+        start = text[0][i]['timestamp'][0]
+        temptext = text[0][i]['text']
         for j in range(i+1,len(text[0])):
-            end = text[0][j]['timestamp'][1]     #끝나는시간
-            temptext= ' '.join([temptext,text[0][j]['timestamp'][0]])
+            end = text[0][j]['timestamp'][1]
+            temptext= ' '.join([temptext,text[0][j]['text']])
             if end-start>shorts_time:
                 break               #계속 합치다가 60초가 넘어가면 break
         candidates.append([temptext,start,end]) #60초동안의 문장,시작시간,끝나는시간 저장
         if j == len(text[0])-1:     #끝나는시간이 영상끝이라면 끝
             break
-        
+
     scorer = rouge_scorer.RougeScorer(['rouge1'], use_stemmer=True)
     for i, candidate in enumerate(candidates):
         scores = scorer.score(text[1], candidate[0])    #우리가 요약한 문장과 쇼츠 후보와 rouge1점수 비교

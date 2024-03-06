@@ -5,9 +5,10 @@ import spacy
 import json
 # from whisper_jax import FlaxWhisperPipline
 # import jax.numpy as jnp
-
 import gc
 import torch
+
+from utils import audioutils
 
 
 MODEL_DICT = {
@@ -17,7 +18,8 @@ MODEL_DICT = {
     's2t': 'facebook/s2t-small-librispeech-asr', 
     'whisper-tiny': 'openai/whisper-tiny.en', 
     'whisper-medium': 'openai/whisper-medium', 
-    'whisper-large': 'openai/whisper-large-v2'
+    'whisper-large': 'openai/whisper-large-v2',
+    'whisper-large3': 'openai/whisper-large-v3'
 }
 
 parser = argparse.ArgumentParser(description='speech')
@@ -44,16 +46,13 @@ def get_sentence_timestamps(result):
     return timestamps
 
 
-def save_text_json(output,video_dir):
-    with open(f'videos/{video_dir}.json', 'w', encoding='utf-8') as json_file:
-        json.dump(output, json_file, indent=4)
-
 def convertAudio2Text(sample,video_dir):
-    processor = AutoProcessor.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='models')
-    model = AutoModelForSpeechSeq2Seq.from_pretrained(MODEL_DICT['whisper-large'], cache_dir='models').to('cuda:0')
+    processor = AutoProcessor.from_pretrained(MODEL_DICT['whisper-large3'], cache_dir='models')
+    model = AutoModelForSpeechSeq2Seq.from_pretrained(MODEL_DICT['whisper-large3'], cache_dir='models').to('cuda:0')
 
     pipe = pipeline(
         "automatic-speech-recognition",
+        batch_size=16,
         model=model,
         tokenizer=processor.tokenizer,
         feature_extractor=processor.feature_extractor,
@@ -63,13 +62,13 @@ def convertAudio2Text(sample,video_dir):
     )
 
     output = pipe(sample, return_timestamps=True)
-    save_text_json(output,video_dir)
+    audioutils.save_text_json(output,video_dir)
     return output['text'], output['chunks']
 
 def convertAudio2TextJax(sample,video_dir):
     pipeline=FlaxWhisperPipline("openai/whisper-large-v2", dtype=jnp.float16)
     result=pipeline(sample, return_timestamps=True)
-    save_text_json(output,video_dir)
+    audioutils.save_text_json(output,video_dir)
     return result['text'], result['chunks']
 
 

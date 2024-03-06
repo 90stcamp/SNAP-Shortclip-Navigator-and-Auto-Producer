@@ -2,7 +2,7 @@ from settings import *
 import numpy as np 
 import matplotlib.pyplot as plt 
 import json
-from openai import OpenAI
+# from openai import OpenAI
 from datasets import load_dataset
 import pandas as pd
 from tqdm import tqdm
@@ -116,3 +116,11 @@ def plot_scatter3D(dataframe, sampling=10_000, save=False, fname='scatter_plot')
         plt.savefig(os.path.join(FIG_DIR, f'{fname}.png'), dpi=200)
     plt.show()
     
+def save_txt_summarize(text,video_id):
+    with open(f'videos/{video_id}.txt', 'w', encoding="UTF-8") as file:
+        file.write(text)
+
+def load_txt_summarize(video_id):
+    with open(f'videos/{video_id}.txt', 'r', encoding="UTF-8") as file:
+        text = file.read()
+    return text
