@@ -110,7 +110,8 @@ if __name__=='__main__':
     with timer("Map Chain"):
         print("Map Chain Start")
         map_template = PromptTemplate(
-            template=prompts.prompt_extsum_paper2(),
+            # template=prompts.prompt_extsum_paper2(),
+            template=prompts.prompt_entertaining_map(),
             input_variables=["document"]
             )
         map_chain = LLMChain(llm=hf, prompt=map_template)
@@ -139,6 +140,7 @@ if __name__=='__main__':
         #         torch.cuda.empty_cache()
         #         # print(len(tokenizer.tokenize(future.result()[0]['text'])))
         #         results.append(future.result())
+        
         map_result = asyncio.run(map_async(chunks, executor))
 
     with timer("Reduce Chain"):
@@ -157,4 +159,4 @@ if __name__=='__main__':
         reduce_result = reduce_chain.invoke(reduce_target)['text']
 
         with open(os.path.join(SUMM_DIR, f"result/{args.save_name}.txt"), 'w') as f:
-            f.write(reduce_result)
+            f.write(reduce_target)
