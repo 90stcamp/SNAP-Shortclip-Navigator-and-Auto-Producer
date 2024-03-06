@@ -134,10 +134,11 @@ def summarize_mapreduce(input, prompt):
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
     pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, 
-        max_new_tokens=100, device = 0, pad_token_id=tokenizer.eos_token_id)
+        max_new_tokens=400, device = 0, pad_token_id=tokenizer.eos_token_id)
     hf = HuggingFacePipeline(pipeline=pipe)
 
     response = get_sum(input, prompt, hf)
+    
     torch.cuda.empty_cache()
     return response
 
