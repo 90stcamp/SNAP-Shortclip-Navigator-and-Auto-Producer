@@ -4,6 +4,8 @@ from settings import *
 import numpy as np
 from tqdm import tqdm
 from rouge_score import rouge_scorer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 def get_Rouge_score(list_generated,list_abstract):
@@ -48,30 +50,39 @@ def save_rouge_avg(avg_array, save_name):
         print('기존 파일이 존재합니다. 다른 save_name을 설정해주세요.')
         raise
 
-def top_k_text(text,shorts_time=60, k=3, interval=1):
-    """
-    #shorts title length, Top K , How many sentences
-    """
+def make_candidates(timestamps,shorts_time=60, interval=1):
     candidates = []
-    for i in range(0,len(text[0]),interval):
-        start = text[0][i]['timestamp'][0]
-        temptext = text[0][i]['text']
-        for j in range(i+1,len(text[0])):
-            end = text[0][j]['timestamp'][1]
-            temptext= ' '.join([temptext,text[0][j]['text']])
-            if end-start>shorts_time:
-                break               #계속 합치다가 60초가 넘어가면 break
-        candidates.append([temptext,start,end]) #60초동안의 문장,시작시간,끝나는시간 저장
-        if j == len(text[0])-1:     #끝나는시간이 영상끝이라면 끝
-            break
+    n = len(timestamps)
+    for i in range(0, n, interval):
+        start, end = timestamps[i]['timestamp']
+        temptext = timestamps[i]['text']
+        for j in range(i+1, n):
+            if end - start > shorts_time:
+                break
+            end = timestamps[j]['timestamp'][1]
+            temptext += ' ' + timestamps[j]['text']
+        candidates.append([temptext, start, end])
+    return candidates
 
+def calculate_cosine_similarity(str1, str2):
+    vectorizer = TfidfVectorizer().fit_transform([str1, str2])
+    vectors = vectorizer.toarray()
+    csim = cosine_similarity(vectors)
+    return csim[0][1]
+
+
+def retrieve_top_k_rouge(text, candidates, k=1, score='rouge'):
+    retrieve=[]
     scorer = rouge_scorer.RougeScorer(['rouge1'], use_stemmer=True)
-    for i, candidate in enumerate(candidates):
-        scores = scorer.score(text[1], candidate[0])    #우리가 요약한 문장과 쇼츠 후보와 rouge1점수 비교
-        candidates[i] = [*candidate,scores['rouge1'][2]]#[60초동안의 문장, 시작시간,끝나는시간, rouge1_F1점수]
+    for candidate in candidates:
+        scores = scorer.score(text, candidate[0])    #우리가 요약한 문장과 쇼츠 후보와 rouge1점수 비교
+        retrieve.append([*candidate,scores['rouge1'][2]])#[60초동안의 문장, 시작시간,끝나는시간, rouge1_F1점수]
+    retrieve.sort(reverse = True, key = lambda x : x[3])#rouge1_F1점수로 sort
+    return retrieve[0]
 
-    candidates.sort(reverse = True, key = lambda x : x[3])#rouge1_F1점수로 sort
-
-    final_candidates = candidates[:k]
-    return final_candidates
-
+def retrieve_top_k_cosine(text, candidates, k=1):
+    retrieve=[]
+    for candidate in candidates:
+        retrieve.append([*candidate,calculate_cosine_similarity(text,candidate[0])])
+    retrieve.sort(reverse = True, key = lambda x : x[3])
+    return retrieve[0]

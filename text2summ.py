@@ -1,4 +1,4 @@
-from utils import prompts, utils, scores
+from utils import prompts, llmUtils, scores
 from settings import *
 import argparse 
 import json
@@ -21,12 +21,12 @@ import torch
 import numpy as np
 
 
-config = utils.load_json(CONFIG_DIR)
+config = llmUtils.load_json(CONFIG_DIR)
 np.random.seed(2024)
 
 
 def get_dataset(lower,upper):
-    df = utils.load_data(config['data_name'],lower = lower, upper = upper)
+    df = llmUtils.load_data(config['data_name'],lower = lower, upper = upper)
     return df
 
 def input_llm(len_sen,doc):
@@ -183,7 +183,7 @@ if __name__=='__main__':
     iter = args.iter_n
     save_name = args.save_name
 
-    dataset = utils.load_data(config['data_name'][args.data_num], lower = lower, upper = upper)
+    dataset = llmUtils.load_data(config['data_name'][args.data_num], lower = lower, upper = upper)
     if len(dataset) < n:
         n = len(dataset)
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)

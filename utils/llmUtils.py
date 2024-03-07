@@ -8,6 +8,7 @@ import pandas as pd
 from tqdm import tqdm
 import nltk
 from utils import preprocess
+import re
 
 def load_json(path):
     with open(path) as f:
@@ -73,8 +74,6 @@ def chat_api(client, message, system, user, model_name):
     response = json.loads(response)
     return response['choices'][0]['message']['content']
 
-
-
 def plot_scatter2D(dataframe, sampling=10_000, save=False, fname='scatter_plot'):
     color_map = ['#8B0000', '#FF0000', '#BDB76B', '#7CFC00', '#008080', '#4169E1', '#FF69B4']
     if sampling:
@@ -118,9 +117,15 @@ def plot_scatter3D(dataframe, sampling=10_000, save=False, fname='scatter_plot')
     
 def save_txt_summarize(text,video_id):
     with open(f'videos/{video_id}.txt', 'w', encoding="UTF-8") as file:
+        text+="/n/n"
         file.write(text)
 
 def load_txt_summarize(video_id):
     with open(f'videos/{video_id}.txt', 'r', encoding="UTF-8") as file:
         text = file.read()
     return text
+
+def get_origin_text(text):
+    matches = re.findall(r'\d+\..*?\n', text)
+    responds = [match.split('.', 1)[1].strip() for match in matches]
+    return responds
