@@ -138,6 +138,16 @@ def prompt_retrieval():
     """
     return template
 
+def prompt_reduce_common_pick():
+    """
+    Reduce prompt for all common domains to pick top scenes
+    """
+    template = """
+    <s>[INST]<>Please pick out the top five scenes that could be the most important moments or 'hot clips' from various parts of the script.
+    Important Moments: {ext_sum}<>[/INST]<\s>.
+    """
+    return template
+
 
 def prompt_reduce_entertain_pick():
     """
@@ -146,5 +156,45 @@ def prompt_reduce_entertain_pick():
     template = """
     <s>[INST]<>Please pick out the top five scenes that could be the most entertaining moments or 'hot clips' from various parts of the script.
     Entertaining Moments: {ext_sum}<>[/INST]<\s>.
+    """
+    return template
+
+def prompt_reduce_news_pick():
+    """
+    Reduce prompt for news and politics to pick top scenes
+    """
+    template = """
+    <s>[INST]<>Please pick out the top five scenes that could be the most informative moments or 'hot clips' from various parts of the script.
+    Important Moments: {ext_sum}<>[/INST]<\s>.
+    """
+    return template
+
+def prompt_reduce_comedy_pick():
+    """
+    Reduce prompt for comedy to pick top scenes
+    """
+    template = """
+    <s>[INST]<>Please pick out the top five scenes that could be the most funniest moments or 'hot clips' from various parts of the script.
+    Important Moments: {ext_sum}<>[/INST]<\s>.
+    """
+    return template
+
+def prompt_reduce_sci_pick():
+    """
+    Reduce prompt for science and technology to pick top scenes
+    """
+    template = """
+    <s>[INST]<>Please pick out the top five scenes that could be the most interesting scientific moments or 'hot clips' from various parts of the script.
+    Important Moments: {ext_sum}<>[/INST]<\s>.
+    """
+    return template
+
+def prompt_reduce_travel_pick():
+    """
+    Reduce prompt for travel and events to pick top scenes
+    """
+    template = """
+    <s>[INST]<>Please pick out the top five scenes that could be the most fasntastic moments on travel or 'hot clips' from various parts of the script.
+    Important Moments: {ext_sum}<>[/INST]<\s>.
     """
     return template
