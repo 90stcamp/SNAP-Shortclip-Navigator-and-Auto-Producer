@@ -1,4 +1,4 @@
-from utils import prompts, utils, scores
+from utils import prompts, llmUtils, scores
 from settings import *
 import argparse 
 import json
@@ -21,12 +21,12 @@ import torch
 import numpy as np
 
 
-config = utils.load_json(CONFIG_DIR)
+config = llmUtils.load_json(CONFIG_DIR)
 np.random.seed(2024)
 
 
 def get_dataset(lower,upper):
-    df = utils.load_data(config['data_name'],lower = lower, upper = upper)
+    df = llmUtils.load_data(config['data_name'],lower = lower, upper = upper)
     return df
 
 def input_llm(len_sen,doc):
@@ -134,7 +134,7 @@ def summarize_mapreduce(input, prompt):
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
     pipe = pipeline("text-generation", model=model, tokenizer=tokenizer, 
-        max_new_tokens=100, device = 0, pad_token_id=tokenizer.eos_token_id)
+        max_new_tokens=400, device = 0, pad_token_id=tokenizer.eos_token_id)
     hf = HuggingFacePipeline(pipeline=pipe)
 
     response = get_sum(input, prompt, hf)
@@ -182,7 +182,7 @@ if __name__=='__main__':
     iter = args.iter_n
     save_name = args.save_name
 
-    dataset = utils.load_data(config['data_name'][args.data_num], lower = lower, upper = upper)
+    dataset = llmUtils.load_data(config['data_name'][args.data_num], lower = lower, upper = upper)
     if len(dataset) < n:
         n = len(dataset)
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
