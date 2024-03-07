@@ -8,7 +8,7 @@ import json
 import gc
 import torch
 
-from utils import audioutils
+from utils import audioUtils
 
 
 MODEL_DICT = {
@@ -62,13 +62,13 @@ def convertAudio2Text(sample,video_dir):
     )
 
     output = pipe(sample, return_timestamps=True)
-    audioutils.save_text_json(output,video_dir)
+    audioUtils.save_text_json(output,video_dir)
     return output['text'], output['chunks']
 
 def convertAudio2TextJax(sample,video_dir):
     pipeline=FlaxWhisperPipline("openai/whisper-large-v2", dtype=jnp.float16)
     result=pipeline(sample, return_timestamps=True)
-    audioutils.save_text_json(output,video_dir)
+    audioUtils.save_text_json(output,video_dir)
     return result['text'], result['chunks']
 
 
