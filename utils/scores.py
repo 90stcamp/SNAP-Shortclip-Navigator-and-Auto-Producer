@@ -1,5 +1,5 @@
-from rouge import Rouge
-import pandas as pd
+# from rouge import Rouge
+# import pandas as pd
 from settings import *
 import numpy as np
 from tqdm import tqdm

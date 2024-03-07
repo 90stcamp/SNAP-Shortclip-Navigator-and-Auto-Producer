@@ -5,36 +5,22 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 
-[[tool.poetry.source]]
-name = "jax-releases"
-url = "https://storage.googleapis.com/jax-releases/jax_cuda_releases.html"
-secondary = true
-
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
 librosa = "*"
 transformers = "4.35.0"
 soundfile = "*"
-evaluate = "*"
-datasets = "*"
-accelerate = "*"
-jiwer = "*"
-gradio = "*"
 ffmpeg = "*"
-openai = "*"
-rouge = "*"
-nltk = "*"
 torch = "1.11.0"
 langchain = "*"
 moviepy = "*"
-pytube = "*"
 spacy = "*"
-cached-property = "*"
 pandas = "*"
 beautifulsoup4 = "*"
-selenium = "*"
-rouge-score = "*"
 scikit-learn = "*"
+tiktoken = "*"
+rouge-score = "*"
+pytube = "*"
 
 
 [build-system]
