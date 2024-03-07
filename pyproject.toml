@@ -13,7 +13,7 @@ secondary = true
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
 librosa = "*"
-transformers = "*"
+transformers = "4.35.0"
 soundfile = "*"
 evaluate = "*"
 datasets = "*"
@@ -29,13 +29,12 @@ langchain = "*"
 moviepy = "*"
 pytube = "*"
 spacy = "*"
-jax = { version = "*", extras = ["cuda11_pip"] }
-whisper-jax = {git = "https://github.com/sanchit-gandhi/whisper-jax.git"}
 cached-property = "*"
 pandas = "*"
 beautifulsoup4 = "*"
 selenium = "*"
 rouge-score = "*"
+scikit-learn = "*"
 
 
 [build-system]
