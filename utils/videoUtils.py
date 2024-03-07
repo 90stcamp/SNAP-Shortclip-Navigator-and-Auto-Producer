@@ -9,7 +9,7 @@ def cut_video(video_id,candidates):
         ffmpeg_extract_subclip(f'videos/{video_id}.mp4', start_time, end_time, targetname='temp.mp4')
         ffmpeg_extract_subclip(f'videos/{video_id}.mp3', start_time, end_time, targetname='temp.mp3')
         #start,end timed으로 자르기
-        cmd = f"ffmpeg -i temp.mp4 -i temp.mp3 -c:v copy -c:a mp3 -map 0:v:0 -map 1:a:0 outputs/{video_id[:3]}_shorts_{i+1}.mp4"
+        cmd = f"ffmpeg -i temp.mp4 -i temp.mp3 -c:v copy -c:a mp3 -map 0:v:0 -map 1:a:0 results/{video_id}_shorts{i+1}.mp4"
         #ffmpeg 커맨드 , temp.mp4에 temp.mp3 합침 , 같은거 방지 오류 {video_id[:3]}
         # subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         subprocess.call(cmd, shell=True)
