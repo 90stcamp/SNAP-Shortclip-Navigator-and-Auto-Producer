@@ -27,46 +27,38 @@ def timer(name):
     yield
     print(f"[{name}] done in {time.time() - t0:.3f} s")
 
-def map_prompt():
+def enter_map_prompt():
     template="""
-    <s>[INST]<>Find the entertaining moment in this script and return it.
+    <s>[INST]<>Find the entertaining moment in this script specific sentence and return it.
 
     Document: {document}<>[/INST]<\s>.
     """
     return template
 
-def reduce_prompt():
+def enter_reduce_prompt():
     template = """
     <s>[INST]<>Please pick out the top five scenes that could be the most entertaining moments or 'hot clips' from various parts of the script.
     Entertaining Moments: {ext_sum}<>[/INST]<\s>.
     """
     return template
 
-#557.711 s
-# def map_prompt():
-#     template="""
-#     <s>[INST]<>Find the highlight scene or scoring specific scene of the match in this script and return it.
-
-#     Document: {document}<>[/INST]<\s>.
-#     """
-#     return template
-
-# def reduce_prompt():
-#     template = """
-#     <s>[INST]<>Please pick out the top five scenes that could be the most important highlight specific scene or scoring scene from various parts of the script.
-#     highlight scene: {ext_sum}<>[/INST]<\s>.
-#     """
-#     return template
+def log_token_counts(docs):
+    """문서들의 토큰 수를 로깅하는 함수"""
+    for doc in docs:
+        tokens = tokenizer.tokenize(doc)
+        print(f"Document token count: {len(tokens)}")  # 토큰 수 출력
+    return docs  # 문서들을 변경하지 않고 반환
 
 def create_map_reduce_chain():
     map_template = PromptTemplate(
         template=prompts.prompt_extsum_paper2(),
+        # template = enter_map_prompt(),
         input_variables=["document"]
         )
     map_chain = LLMChain(llm=hf, prompt=map_template)
 
     reduce_template = PromptTemplate(
-        template= reduce_prompt(),
+        template= enter_reduce_prompt(),
         input_variables=["ext_sum"]
         )
     reduce_chain = LLMChain(llm=hf, prompt=reduce_template) 
@@ -74,14 +66,14 @@ def create_map_reduce_chain():
     # reduce_chain에 전달할 문서 정의. 여러 문서를 하나로 결합하는 역할
     combine_documents_chain = StuffDocumentsChain(
         llm_chain=reduce_chain, 
-        document_variable_name= "ext_sum" # (reduce_template 에 정의된 변수명)
+        document_variable_name= "ext_sum"# (reduce_template 에 정의된 변수명)
     )
     # token_max를 넘어가면 문서를 결합하거나 분할하는 역할
     reduce_documents_chain = ReduceDocumentsChain(
         # map_chain들의 결과를 결합
         combine_documents_chain=combine_documents_chain,
         # max_token이 넘어가면 분할
-        collapse_documents_chain=combine_documents_chain,
+        # collapse_documents_chain=combine_documents_chain,
         # The maximum number of tokens to group documents into.
         token_max=args.chunk_size,
     )
@@ -103,8 +95,9 @@ def my_tokenizer_func(text):
 
 def get_sum(text):
     torch.cuda.empty_cache()
-    text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
-        # tokenizer = tokenizer,
+    # text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
+    text_splitter = CharacterTextSplitter.from_huggingface_tokenizer(
+        tokenizer = tokenizer,
         separator= '\n',
         chunk_size = args.chunk_size,
         chunk_overlap = args.chunk_overlap,
@@ -112,6 +105,10 @@ def get_sum(text):
     )
     chain = create_map_reduce_chain()
     split_docs = text_splitter.create_documents([text])
+    # text_token = []
+    for i in split_docs:
+        token = tokenizer.tokenize(i.page_content)
+        print(len(token))
     # map reduce 과정 수행
     summarize_text = chain.invoke(split_docs)
     return summarize_text['output_text']
@@ -119,7 +116,7 @@ def get_sum(text):
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '--text_path', required= True, type=str
+        '--script_name', required= True, type=str
         )
     parser.add_argument(
         '--model_num', default=1, type=int
@@ -131,10 +128,10 @@ if __name__=='__main__':
         '--chunk_size', default=1024, type=int
         )
     parser.add_argument(
-        '--chunk_overlap', default=100, type=int
+        '--chunk_overlap', default=200, type=int
         )
     parser.add_argument(
-        '--save_path', required=True, type=str
+        '--save_name', required=True, type=str
         )
     args = parser.parse_args()
 
@@ -160,7 +157,7 @@ if __name__=='__main__':
         print("Load model and Setting pipline End...")
 
         print('Load Text file...')
-        with open(args.text_path, 'r') as f:
+        with open(os.path.join(SUMM_DIR, f"script/{args.script_name}.txt"), 'r') as f:
             lines = f.readlines()
         text = ' '.join(lines)
         print('Load Text file End...')
@@ -170,5 +167,5 @@ if __name__=='__main__':
         print('Summarization Start...')
         summarize_text = get_sum(text)
         print('Summarization End...')
-        with open(args.save_path, 'w') as f:
+        with open(os.path.join(SUMM_DIR, f"result/{args.save_name}.txt"), 'w') as f:
             f.write(summarize_text)
