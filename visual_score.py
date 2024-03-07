@@ -14,6 +14,7 @@ from tqdm import tqdm
 from transformers import CLIPProcessor, CLIPModel
 from torchvision import transforms
 from scenedetect import detect, ContentDetector, AdaptiveDetector, split_video_ffmpeg
+from operator import itemgetter
 
 def get_video_info(filepath):
     video = cv2.VideoCapture(filepath)
@@ -57,9 +58,7 @@ def save_video_frame(filepath, video, fps, per_min):
 
 
 # 이미 util에 있을 수도
-def get_visual_scores(text, batch_size):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+def get_visual_scores(model, processor, device, text, image_list, batch_size):
     class_ = text.split('\n') # 다른 모듈과 일치 시키기 위해 바꿔줘야함
     class_name = class_[1:-1]
     images = [Image.open(image) for image in image_list]
@@ -83,7 +82,7 @@ def get_visual_scores(text, batch_size):
 
 
 # Visualization
-def get_top_frame(score_tensor, filepath, top_k):    
+def get_top_frame(score_tensor, image_list, filepath, top_k):    
     for sentence in range(score_tensor.shape[1]):
         top_k_value, top_k_index = torch.topk(score_tensor[:, sentence], top_k, largest=True)
 
@@ -99,30 +98,32 @@ def get_top_frame(score_tensor, filepath, top_k):
             plt.show()
 
 
-def split_frame(filepath, class_name, score_tensor): # AdaptiveDetector, ContentDetector 중 선택
+def split_frame(filepath, class_name, score_tensor, fps): # AdaptiveDetector, ContentDetector 중 선택
     # AdaptiveDetector
     #scene_list = detect(filepath, AdaptiveDetector())
 
     # ContentDetector
     threshold = 80
-    min_scene_len= 29.97*10 # fps * 시간
+    min_scene_len= fps*10 # fps * 시간
     scene_list = detect(filepath, ContentDetector(min_scene_len=min_scene_len, threshold=threshold))
     
-    print(f'Splitting video by {len(scene_list)}... it takes time')
-    split_video_ffmpeg(filepath, scene_list)
     scene_time = [[int(x[0].get_frames()/fps), int(x[1].get_frames()/fps)] for x in scene_list]
     print(scene_time)
     scene_score = [score_tensor[x[0]:x[1]] for x in scene_time]
     scene_score_class = torch.stack([x.mean(dim=0) for x in scene_score])
 
+    print(f'Splitting video by {len(scene_list)}... it takes time')
     k = 3 #len(scene_time)
-    for sentence in range(score_tensor.shape[1]):
+    for sentence in tqdm(range(score_tensor.shape[1])):
         top_k_value, top_k_index = torch.topk(scene_score_class[:, sentence], k, largest=True)
 
         print(f"Class: {class_name[sentence]}:")
-        print([(int(x.to('cpu')+1),float(y.to('cpu'))) for x,y in zip(top_k_index,top_k_value)])
+        print([(itemgetter(x)(scene_time),float(y)) for x,y in zip(top_k_index,top_k_value)])
+        split_video_ffmpeg(filepath, itemgetter(*top_k_index)(scene_list), video_name=f"data/video/result/{filepath.split('/')[-1][:-4]}-{sentence+1}")
 
+    #split_video_ffmpeg(filepath, scene_list, video_name=f"data/video/result/{filepath.split('/')[-1]}")
     return scene_score_class
+
 
 
 if __name__=='__main__':
@@ -130,7 +131,7 @@ if __name__=='__main__':
     model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
     processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
     batch_size = 64
-    top_k = 5
+    #top_k = 5 이미지 top 이므로 현재 단계에서 사용X
 
     filepath = 'data/video/test3.mp4'
     image_list = natsorted(glob.glob(f'{filepath[:-4]}/*.jpg'))
@@ -147,6 +148,6 @@ if __name__=='__main__':
 
     # save 구조로 갈지 returen 구조로 갈지 고민 필요
     save_video_frame(filepath, video, fps, 1) # 마지막은 몇 초에 한번 프레임을 생성할 것인지
-    score_tensor, class_name = get_visual_scores(text, batch_size)
-    #get_top_frame(score_tensor, filepath, top_k)
-    scene_score_class = split_frame(filepath, class_name, score_tensor)
+    score_tensor, class_name = get_visual_scores(model, processor, device, text, image_list, batch_size)
+    #get_top_frame(score_tensor, image_list, filepath, top_k)
+    scene_score_class = split_frame(filepath, class_name, score_tensor, fps)
