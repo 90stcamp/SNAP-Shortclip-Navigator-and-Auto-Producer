@@ -17,8 +17,8 @@ if __name__ == '__main__':
     logging.info("Process Started")
 
     video_id=youtube_link.split('watch?v=')[1]
-    # category=crawlers.get_youtube_category(youtube_link)
-    category="Entertainment"
+    category=crawlers.get_youtube_category(youtube_link)
+    # category="Entertainment"
     logging.info(f"Video Category: {category}")
 
     logging.info("Process: Video Download")
