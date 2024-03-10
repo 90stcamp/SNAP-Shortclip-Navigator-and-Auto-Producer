@@ -1,13 +1,4 @@
-from settings import *
-import numpy as np 
-# import matplotlib.pyplot as plt 
 import json
-# from openai import OpenAI
-# from datasets import load_dataset
-import pandas as pd
-from tqdm import tqdm
-# import nltk
-from utils import preprocess
 import re
 
 
@@ -29,3 +20,14 @@ def get_origin_text(text):
 def save_text_json(output,video_id):
     with open(f'../videos/{video_id}.json', 'w', encoding='utf-8') as json_file:
         json.dump(output, json_file, indent=4)
+
+def change_timestamp_list(video_id):
+    """
+    Change timestamp json for llm list format
+    """
+    with open(f'../videos/{video_id}.json', 'r', encoding="UTF-8") as file:
+        data = json.load(file)
+    array=[]
+    for item in data["chunks"]:
+        array.append(f"({item['timestamp'][0]}) {item['text']}")
+    return " \n ".join(array)

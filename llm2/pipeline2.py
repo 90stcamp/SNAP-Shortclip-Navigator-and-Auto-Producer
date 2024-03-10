@@ -1,5 +1,4 @@
 import logging
-import librosa
 
 from text2summ import *
 from utils import scores, domainFlow, llmUtils, crawlers
@@ -10,17 +9,13 @@ import threading
 logging.basicConfig(format='(%(asctime)s) %(levelname)s:%(message)s', 
                     datefmt ='%m/%d %I:%M:%S %p', level=logging.INFO)
 
-def process(video_id, ):
-
-
-if __name__ == '__main__':
+def process(video_id, timestamps):
     logging.info("Process2 Started")
-
-    video_id=youtube_link.split('watch?v=')[1]
-    category=crawlers.get_youtube_category(youtube_link)
+    category=crawlers.get_youtube_category(video_id)
     logging.info(f"Video Category: {category}")
 
-    script_time = audioUtils.change_timestamp_list(video_id)
+    script, timestamps = llmUtils.get_audio_text_json
+    script_time = llmUtils.change_timestamp_list(video_id)
 
     logging.info("Process: Text Summarization")
     output_llm=domainFlow.separate_reduce_domain(category, script_time)
@@ -38,21 +33,46 @@ if __name__ == '__main__':
         timeselect.append(scores.retrieve_top_k_cosine(res, timecand))
     llmUtils.save_text_json(timeselect,video_id+"_top")
     logging.info("Download: Summarized txt Completed")
+    return timeselect
 
-def check_requests():
+
+def write_requests3(video_id, timeselect):
+    with open('../requests3.json', 'r+', encoding='UTF-8') as file2:
+        try:
+            requests = json.load(file2)
+        except:
+            requests = []
+        requests.append({video_id: timeselect})
+        json.dump(requests, file2)
+
+def check_request_loop():
     while True:
-        with open('../requests1.json', 'r+', encoding='UTF-8') as file:
+        with open('../requests2.json', 'r+', encoding='UTF-8') as file:
             try:
                 requests = json.load(file)
                 if requests:
-                    link = requests.pop(0)['link']
-                    time_script = process(link)
+                    request = requests.pop(0)
+                    video_id = request['video_id']
+                    timestamp = process(video_id)
                     file.seek(0)
                     json.dump(requests, file)
                     file.truncate()
-                    write_requests2(link, time_script)
+                    write_requests3(video_id, timestamp)
             except:
                 pass
+            
+def check_requests():
+    with open('../requests2.json', 'r+', encoding='UTF-8') as file:
+        requests = json.load(file)
+        if requests:
+            request = requests.pop(0)
+            video_id = request['video_id']
+            timestamp = process(video_id)
+            file.seek(0)
+            json.dump(requests, file)
+            file.truncate()
+            write_requests3(video_id, timestamp)
+
 
 if __name__ == "__main__":
     request_thread = threading.Thread(target=check_requests)
