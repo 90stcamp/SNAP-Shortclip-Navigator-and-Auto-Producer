@@ -1,27 +1,22 @@
 [tool.poetry]
-name = "youtube-shorts"
+name = "youtube-shorts-audio"
 version = "0.1.0"
 description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
-librosa = "*"
+python = ">=3.9,<4.0"
+librosa = "0.10.1"
+torch= "1.11.0"
 transformers = "4.35.0"
-soundfile = "*"
-ffmpeg = "*"
-torch = "1.11.0"
-langchain = "*"
-moviepy = "*"
-spacy = "*"
-pandas = "*"
-beautifulsoup4 = "*"
-scikit-learn = "*"
-tiktoken = "*"
-rouge-score = "*"
-pytube = "*"
-
+soundfile = "0.12.1"
+moviepy = "1.0.3"
+spacy = "3.4.3"
+beautifulsoup4 = "4.12.3"
+scikit-learn = "1.3.2"
+pytube = "15.0.0"
+selenium = "*"
 
 [build-system]
 requires = ["poetry-core"]

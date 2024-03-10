@@ -1,0 +1,20 @@
+version: '1'
+services:
+  audio1:
+    build:
+      context: ./audio1
+      dockerfile: Dockerfile
+    volumes:
+      - appdata:/data
+
+  llm2:
+    build:
+      context: ./llm2
+      dockerfile: Dockerfile
+    depends_on:
+      - audio1
+    volumes:
+      - appdata:/data
+
+volumes:
+  appdata:
