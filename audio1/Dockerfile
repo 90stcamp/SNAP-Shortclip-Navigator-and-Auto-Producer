@@ -26,18 +26,6 @@ COPY . .
 FROM python:3.9-slim
 WORKDIR /app
 
-# Install Google Chrome
-RUN apt-get update && apt-get install -y wget gnupg2 \
-    && wget https://mirror.cs.uchicago.edu/google-chrome/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.90-1_amd64.deb \
-    && dpkg -i google-chrome-stable_114.0.5735.90-1_amd64.deb; apt-get -fy install
-
-# Install ChromeDriver
-RUN wget https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip \
-    && apt-get install unzip -y \
-    && unzip chromedriver_linux64.zip \
-    && chmod +x chromedriver \
-    && mv chromedriver /usr/local/bin/
-
 # Copy installed packages and binaries from builder stage
 COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin

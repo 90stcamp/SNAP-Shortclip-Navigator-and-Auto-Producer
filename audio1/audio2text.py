@@ -52,7 +52,7 @@ def convertAudio2Text(sample,video_dir):
 
     pipe = pipeline(
         "automatic-speech-recognition",
-        batch_size=16,
+        batch_size=32,
         model=model,
         tokenizer=processor.tokenizer,
         feature_extractor=processor.feature_extractor,
