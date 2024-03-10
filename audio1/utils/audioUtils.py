@@ -35,14 +35,3 @@ def get_norm_timestamp_json(duration, video_id):
 def save_text_json(output,video_id):
     with open(f'../videos/{video_id}.json', 'w', encoding='utf-8') as json_file:
         json.dump(output, json_file, indent=4)
-
-def change_timestamp_list(video_id):
-    """
-    Change timestamp json for llm list format
-    """
-    with open(f'../videos/{video_id}.json', 'r', encoding="UTF-8") as file:
-        data = json.load(file)
-    array=[]
-    for item in data["chunks"]:
-        array.append(f"({item['timestamp'][0]}) {item['text']}")
-    return " \n ".join(array)
