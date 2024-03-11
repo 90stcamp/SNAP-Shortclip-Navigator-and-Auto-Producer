@@ -9,22 +9,22 @@ import threading
 logging.basicConfig(format='(%(asctime)s) %(levelname)s:%(message)s', 
                     datefmt ='%m/%d %I:%M:%S %p', level=logging.INFO)
 
-def process(video_id, timestamps):
+def process(video_id):
     logging.info("Process2 Started")
     category=crawlers.get_youtube_category(video_id)
     logging.info(f"Video Category: {category}")
 
-    script, timestamps = llmUtils.get_audio_text_json
+    script, timestamps = llmUtils.get_audio_text_json(video_id)
     script_time = llmUtils.change_timestamp_list(video_id)
 
     logging.info("Process: Text Summarization")
     output_llm=domainFlow.separate_reduce_domain(category, script_time)
+    txt_llm=llmUtils.get_origin_text(output_llm)
     llmUtils.save_txt_summarize(output_llm,video_id)
     logging.info("Download: Summarized txt Completed")
 
     logging.info("Process: Summ-Text top-k candidates")
     output_llm=llmUtils.load_txt_summarize(video_id)
-    txt_llm=llmUtils.get_origin_text(output_llm)
     timeselect=[]
     timecand=scores.make_candidates(timestamps,20,1)
 

@@ -40,7 +40,7 @@ def get_youtube_category(video_id):
     options.add_argument(f'user-agent={user_agent}')    
     driver = webdriver.Chrome(options=options)
 
-    driver.get(f'https://www.youtube.com/watch?v={youtube_link}')
+    driver.get(f'https://www.youtube.com/watch?v={video_id}')
     html=driver.page_source
     category=html.split('"category":"')[1].split('",')[0]
     return category

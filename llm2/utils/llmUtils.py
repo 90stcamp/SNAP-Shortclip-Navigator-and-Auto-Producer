@@ -3,12 +3,12 @@ import re
 
 
 def save_txt_summarize(text,video_id):
-    with open(f'videos/{video_id}.txt', 'w', encoding="UTF-8") as file:
+    with open(f'../videos/{video_id}.txt', 'w', encoding="UTF-8") as file:
         text+="/n/n"
         file.write(text)
 
 def load_txt_summarize(video_id):
-    with open(f'videos/{video_id}.txt', 'r', encoding="UTF-8") as file:
+    with open(f'../videos/{video_id}.txt', 'r', encoding="UTF-8") as file:
         text = file.read()
     return text
 
@@ -31,3 +31,8 @@ def change_timestamp_list(video_id):
     for item in data["chunks"]:
         array.append(f"({item['timestamp'][0]}) {item['text']}")
     return " \n ".join(array)
+
+def get_audio_text_json(video_id):
+    with open(f'../videos/{video_id}.json', 'r', encoding="UTF-8") as file:
+        data = json.load(file)
+    return data['text'], data['chunks']
