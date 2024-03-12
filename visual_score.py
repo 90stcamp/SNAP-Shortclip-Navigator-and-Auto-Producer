@@ -15,6 +15,11 @@ from transformers import CLIPProcessor, CLIPModel
 from torchvision import transforms
 from scenedetect import detect, ContentDetector, AdaptiveDetector, split_video_ffmpeg
 from operator import itemgetter
+import logging
+from pytube import YouTube
+import shutil
+import re
+
 
 def get_video_info(filepath):
     video = cv2.VideoCapture(filepath)
@@ -98,7 +103,7 @@ def get_top_frame(score_tensor, image_list, filepath, top_k):
             plt.show()
 
 
-def split_frame(filepath, class_name, score_tensor, fps): # AdaptiveDetector, ContentDetector 중 선택
+def split_frame(filepath, class_name, score_tensor, fps, split): # AdaptiveDetector, ContentDetector 중 선택
     # AdaptiveDetector
     #scene_list = detect(filepath, AdaptiveDetector())
 
@@ -113,31 +118,66 @@ def split_frame(filepath, class_name, score_tensor, fps): # AdaptiveDetector, Co
     scene_score_class = torch.stack([x.mean(dim=0) for x in scene_score])
 
     print(f'Splitting video by {len(scene_list)}... it takes time')
+    if not os.path.exists('videos/result/'):
+        os.makedirs('videos/result/')
     k = 3 #len(scene_time)
-    for sentence in tqdm(range(score_tensor.shape[1])):
-        top_k_value, top_k_index = torch.topk(scene_score_class[:, sentence], k, largest=True)
 
-        print(f"Class: {class_name[sentence]}:")
-        print([(itemgetter(x)(scene_time),float(y)) for x,y in zip(top_k_index,top_k_value)])
-        split_video_ffmpeg(filepath, itemgetter(*top_k_index)(scene_list), video_name=f"data/video/result/{filepath.split('/')[-1][:-4]}-{sentence+1}")
+    final_interval = []
+    if split:
+        for sentence in tqdm(range(score_tensor.shape[1])):
+            top_k_value, top_k_index = torch.topk(scene_score_class[:, sentence], k, largest=True)
+            print(f"Class: {class_name[sentence]}:")
+            print([(itemgetter(x)(scene_time),float(y)) for x,y in zip(top_k_index,top_k_value)])
+            final_interval.append([itemgetter(x)(scene_time) for x in top_k_index])
+            split_video_ffmpeg(filepath, itemgetter(*top_k_index)(scene_list), video_name=f"videos/result/{filepath.split('/')[-1][:-4]}-{sentence+1}")
+    else: 
+        for sentence in tqdm(range(score_tensor.shape[1])):
+            top_k_value, top_k_index = torch.topk(scene_score_class[:, sentence], k, largest=True)
+            print(f"Class: {class_name[sentence]}:")
+            print([(itemgetter(x)(scene_time),float(y)) for x,y in zip(top_k_index,top_k_value)])
+            final_interval.append([itemgetter(x)(scene_time) for x in top_k_index])
+            #split_video_ffmpeg(filepath, itemgetter(*top_k_index)(scene_list), video_name=f"videos/result/{filepath.split('/')[-1][:-4]}-{sentence+1}")
 
-    #split_video_ffmpeg(filepath, scene_list, video_name=f"data/video/result/{filepath.split('/')[-1]}")
-    return scene_score_class
+    return final_interval
 
+# 아래 2개는 다른 util에도 있음
+def downloadYouTube(videourl, f_name, path='videos'):
+    yt = YouTube(videourl)
+    yt = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+    if not os.path.exists(path):
+        os.makedirs(path)
+    yt.download(output_path=path, filename=f'{f_name}.mp4')
 
+def get_origin_text(text):
+    matches = re.findall(r'\d+\..*?\n', text)# 값이 안 찾아짐
+    responds = [match.split('.', 1)[1].strip() for match in matches]
+    return responds
 
 if __name__=='__main__':
+    youtube_link = input("Input your youtube video link: ")
+    #text = input("Input the scenario you'd like to create for short: ")
+
+    logging.info("Process Started")
+    video_id=youtube_link.split('watch?v=')[1]
+    logging.info("Process: Video Download")
+    downloadYouTube(youtube_link, f_name=video_id)
+    logging.info("Download: Video Completed")
+    model_name = 'openai/clip-vit-base-patch32'
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
-    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    model = CLIPModel.from_pretrained(model_name, cache_dir=f'models/{model_name.split("/")[-1]}').to(device)
+    processor = CLIPProcessor.from_pretrained(model_name, cache_dir=f'models/{model_name.split("/")[-1]}')
     batch_size = 64
     #top_k = 5 이미지 top 이므로 현재 단계에서 사용X
 
-    filepath = 'data/video/test3.mp4'
-    image_list = natsorted(glob.glob(f'{filepath[:-4]}/*.jpg'))
+    filepath = f'videos/{video_id}.mp4'
     video, fps = get_video_info(filepath)
 
-    # 다른 모듈과 일치 시키기 위해 바꿔줘야함
+    # save 구조로 갈지 returen 구조로 갈지 고민 필요
+    save_video_frame(filepath, video, fps, 1) # 마지막은 몇 초에 한번 프레임을 생성할 것인지
+    image_list = natsorted(glob.glob(f'{filepath[:-4]}/*.jpg'))
+
+    # 다른 모듈과 일치 시키기 위해 바꿔줘야함(json/parser로?)
+    # text = get_origin_text(text)
     text = """
     1. Mack's encounter with the thousand spiders: This scene is a classic fear-based challenge that is sure to entertain audiences as Mack faces his arachnophobia in a high-pressure situation. The suspense builds as he tries to remain calm and complete the challenge, making it a crowd-pleaser.
     2. Mack's trust fall: In this scene, Mack's friendship with his partner is put to the test as he must trust him to catch him during a blind jump off a plank. The potential for disaster adds to the tension and excitement, making it an entertaining moment.
@@ -145,9 +185,10 @@ if __name__=='__main__':
     4. Mack's reaction to the Feastables bars: This lighthearted scene provides a nice contrast to the more intense challenges as Mack tries a new product and shares his thoughts on the new formula and flavors. The unexpected twist and Mack's honest reactions make it an entertaining moment.
     5. Mack's experience being buried alive: This nerve-wracking and entertaining moment tests Mack's mental strength as he faces his fear of being buried alive and struggles to keep track of time and deal with his claustrophobia. The psychological aspect of the challenge adds an extra layer of intrigue and suspense.
     """
-
-    # save 구조로 갈지 returen 구조로 갈지 고민 필요
-    save_video_frame(filepath, video, fps, 1) # 마지막은 몇 초에 한번 프레임을 생성할 것인지
+    
     score_tensor, class_name = get_visual_scores(model, processor, device, text, image_list, batch_size)
     #get_top_frame(score_tensor, image_list, filepath, top_k)
-    scene_score_class = split_frame(filepath, class_name, score_tensor, fps)
+    final_interval = split_frame(filepath, class_name, score_tensor, fps, split=False)
+    print(final_interval)
+    # return 후 파일 삭제(output video를 넘겨준 뒤 없애야하므로 추후 수정)
+    shutil.rmtree('videos/')
