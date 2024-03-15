@@ -4,10 +4,10 @@ services:
   youtube-short-generator:
     image: whisper_llm 
     build: 
-      context: ./Youtube-Short-Generator
+      context: ./llm
       dockerfile: Dockerfile
     volumes:
-      - ./Youtube-Short-Generator/models:/app/models
+      - ./llm/models:/app/models
       - shared-data:/app/videos 
       - shared-data:/app/file 
     environment:
