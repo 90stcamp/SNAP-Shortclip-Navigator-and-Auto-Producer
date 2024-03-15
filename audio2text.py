@@ -9,7 +9,7 @@ import gc
 import torch
 
 from utils import audioUtils
-
+from settings import *
 
 MODEL_DICT = {
     'wav2vec': 'facebook/wav2vec2-base-960h', 
@@ -47,8 +47,9 @@ def get_sentence_timestamps(result):
 
 
 def convertAudio2Text(sample,video_dir):
-    processor = AutoProcessor.from_pretrained(MODEL_DICT['whisper-large3'], cache_dir='models')
-    model = AutoModelForSpeechSeq2Seq.from_pretrained(MODEL_DICT['whisper-large3'], cache_dir='models').to('cuda:0')
+    cache_dir = MODEL_DIR
+    processor = AutoProcessor.from_pretrained(MODEL_DICT['whisper-large3'], cache_dir=cache_dir)
+    model = AutoModelForSpeechSeq2Seq.from_pretrained(MODEL_DICT['whisper-large3'], cache_dir=cache_dir).to('cuda:0')
 
     pipe = pipeline(
         "automatic-speech-recognition",

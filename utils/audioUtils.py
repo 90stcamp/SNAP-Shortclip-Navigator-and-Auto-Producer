@@ -46,3 +46,12 @@ def change_timestamp_list(video_id):
     for item in data["chunks"]:
         array.append(f"({item['timestamp'][0]}) {item['text']}")
     return " \n ".join(array)
+
+def change_timestamp_list_for_exist(timestamps):
+    """
+    Change timestamp json for llm list format
+    """
+    array=[]
+    for item in timestamps:
+        array.append(f"({item['timestamp'][0]}) {item['text']}")
+    return " \n ".join(array)

@@ -1,24 +1,12 @@
-import argparse 
-from pytube import YouTube
-import os
-from moviepy.editor import VideoFileClip
 import subprocess
+import os
 import re
-def remove_video_name(video_id):
-    for filename in os.listdir(video_id):
-        if filename.startswith(video_id):
-            old_path = os.path.join(video_id, filename)
-            if filename.endswith('.mp4'):
-                new_filename=f"{video_id}.mp4"
-            elif filename.endswith('.m4a'):
-                new_filename=f"{video_id}.m4a"
-            new_path = os.path.join(video_id, new_filename)
-            os.rename(old_path, new_path)
 
 def downloadYouTubeVideo(video_id, videourl):
     command = ['yt-dlp', '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4', '--no-write-auto-subs', '--sub-lang', 'en', '--write-sub', '-o', f'{video_id}/{video_id}.%(ext)s', videourl]
     subprocess.run(command)
     remove_video_name(video_id)
+
     exist_vtt = check_subtitle(video_id)
     #함수를 통해 .vtt(자막) 이 존재하는지 판별합니다.
     return exist_vtt
@@ -83,25 +71,12 @@ def parse_vtt_to_json(file_path):
         })
 
     return result
-    
-def convertVideo2Audio(video_file, output_ext="mp3"):
-    filename, ext = os.path.splitext(video_file)
-    clip = VideoFileClip(video_file)
-    clip.audio.write_audiofile(f"{filename}.{output_ext}")
 
+timestamps =downloadYouTubeVideo('KOEfDvr4DcQ','https://www.youtube.com/watch?v=KOEfDvr4DcQ')
 
-DOMAIN = {
-    'news': 'https://www.youtube.com/watch?v=e0V1CtzFgrU', 
-    'docu': 'https://www.youtube.com/watch?v=rKtzj_9vl8Q', 
-    'show': 'https://www.youtube.com/watch?v=6_PI1l5NKL8', 
-    'movie': 'https://www.youtube.com/watch?v=BxHvI5BVBf4'
-}
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--domain', '-d', required=True, help='must be news, docu, show, and movie')
-    args = parser.parse_args()
-
-    video_path = DOMAIN[args.domain]
-    downloadYouTubeVideo(video_path, f_name=f'{args.domain}')
+if timestamps:
+    #직접달은 영어자막이 존재함
+    pass
+else:
+    #존재안함
+    pass

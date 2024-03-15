@@ -1,0 +1,12 @@
+.git/
+.gitignore
+Dockerfile
+.dockerignore
+README.md
+*.pyc
+__pycache__/
+.env
+/models
+key.json
+server.json
+/file

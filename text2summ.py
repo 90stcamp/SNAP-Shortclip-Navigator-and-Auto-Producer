@@ -129,7 +129,8 @@ def get_sum(text, prompt, hf):
 
 def summarize_mapreduce(input, prompt):
     MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
-    cache_dir = "models"
+    # cache_dir = "models"
+    cache_dir = MODEL_DIR
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME,cache_dir=cache_dir)
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,cache_dir=cache_dir)

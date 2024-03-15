@@ -93,8 +93,8 @@ if __name__=='__main__':
     
     # model_name in config.json
     MODEL_NAME = config['model_name'][args.model_num]
-    cache_dir = config['cache_dir'][args.model_num]
-
+    # cache_dir = config['cache_dir'][args.model_num]
+    cache_dir = MODEL_DIR
     # lower and upper bound for text length
     lower,upper=args.lower, args.upper
     n = args.sample_n

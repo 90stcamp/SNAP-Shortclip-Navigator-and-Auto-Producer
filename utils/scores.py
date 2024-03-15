@@ -50,18 +50,49 @@ def save_rouge_avg(avg_array, save_name):
         print('기존 파일이 존재합니다. 다른 save_name을 설정해주세요.')
         raise
 
-def make_candidates(timestamps,shorts_time=60, interval=1):
-    candidates = []
-    n = len(timestamps)
-    for i in range(0, n, interval):
-        start, end = timestamps[i]['timestamp']
-        temptext = timestamps[i]['text']
-        for j in range(i+1, n):
-            if end - start > shorts_time:
-                break
-            end = timestamps[j]['timestamp'][1]
-            temptext += ' ' + timestamps[j]['text']
-        candidates.append([temptext, start, end])
+# def make_candidates(timestamps,shorts_time=60, interval=1):
+#     candidates = []
+#     n = len(timestamps)
+#     for i in range(0, n, interval):
+#         start, end = timestamps[i]['timestamp']
+#         temptext = timestamps[i]['text']
+#         for j in range(i+1, n):
+#             if end - start > shorts_time:
+#                 break
+#             end = timestamps[j]['timestamp'][1]
+#             temptext += ' ' + timestamps[j]['text']
+#         candidates.append([temptext, start, end])
+#     return candidates
+
+# def make_candidates(timestamps,section):
+#     candidates = [0]*len(section)
+#     for i,(s,e) in enumerate(section):
+#         candidates[i] = {'text' : '',"timestamp" : [[s],[e]]}
+#         for j in range(len(timestamps)):
+#             sts,text = timestamps[j]['timestamp'],timestamps[j]['text']
+#             if sts[0]<=s<=sts[1]<=e or s<=sts[0]<=sts[1]<=e or s<=sts[0]<=e<=sts[1]:
+#                 #겹치는 구간이 있으면
+#                 candidates[i]['text']+=text
+#                 candidates[i]['timestamp'][0].append(sts[0])
+#                 candidates[i]['timestamp'][1].append(sts[1])
+#         candidates[i]['timestamp'][0] = min(candidates[i]['timestamp'][0])
+#         candidates[i]['timestamp'][1] = max(candidates[i]['timestamp'][1])
+#     return candidates
+
+def make_candidates(timestamps,section):
+    candidates = [0]*len(section)
+    for i,(s,e) in enumerate(section):
+        candidates[i] = {'text' : '',"timestamp" : [[s],[e]]}
+        for j in range(len(timestamps)):
+            sts,text = timestamps[j]['timestamp'],timestamps[j]['text']
+            if sts[0]<=s<=sts[1]<=e or s<=sts[0]<=sts[1]<=e or s<=sts[0]<=e<=sts[1]:
+                #겹치는 구간이 있으면
+                candidates[i]['text']+=text
+                candidates[i]['timestamp'][0].append(sts[0])
+                candidates[i]['timestamp'][1].append(sts[1])
+        candidates[i]['timestamp'][0] = min(candidates[i]['timestamp'][0])
+        candidates[i]['timestamp'][1] = max(candidates[i]['timestamp'][1])
+        candidates[i] = [candidates[i]['text'],*candidates[i]['timestamp']]
     return candidates
 
 def calculate_cosine_similarity(str1, str2):
