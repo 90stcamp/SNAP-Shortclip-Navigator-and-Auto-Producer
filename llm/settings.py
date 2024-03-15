@@ -4,6 +4,7 @@ BASE_DIR = os.path.dirname(__file__)
 
 SERVER_DIR = os.path.join(BASE_DIR, 'file/server.json')
 CONFIG_DIR = os.path.join(BASE_DIR, 'file/config.json')
+
 API_KEY = os.path.join(BASE_DIR, 'file/key.json')
 OUT_DIR = os.path.join(BASE_DIR, 'results')
 STATS_DIR = os.path.join(BASE_DIR, 'statistic')
