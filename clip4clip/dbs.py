@@ -1,8 +1,8 @@
 import pymysql
 import json
+from settings import *
 
-
-with open("file/key.json", "r") as env:
+with open(API_KEY, "r") as env:
     env_dict = json.load(env)
     host=env_dict['host']
     user=env_dict['user']
@@ -51,7 +51,7 @@ def insert_data_to_table(conn, cursor, list_col, table_sql, tuple_data):
 
 
 if __name__ == "__main__":
-    with open("file/key.json", "r") as env:
+    with open(API_KEY, "r") as env:
         env_dict = json.load(env)
         host=env_dict['host']
         user=env_dict['user']
