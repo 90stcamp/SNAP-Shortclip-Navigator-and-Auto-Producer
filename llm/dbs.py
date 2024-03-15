@@ -1,8 +1,8 @@
 import pymysql
 import json
+from settings import *
 
-
-with open("file/key.json", "r") as env:
+with open(API_KEY, "r") as env:
     env_dict = json.load(env)
     host=env_dict['host']
     user=env_dict['user']
@@ -28,7 +28,7 @@ def get_data_from_table(cursor, sql):
 
 def get_first_row(table_name, row):
     # sql_first_row = f"""SELECT {row} FROM {table_name} ORDER BY {row} DESC LIMIT 1;"""
-    sql_first_row = f"""SELECT youtube_id, category FROM querys.WEB WHERE stage = '0' ORDER BY ASC time_stamp LIMIT 1;"""
+    sql_first_row = f"""SELECT youtube_id, category FROM querys.WEB WHERE stage = '0' ORDER BY time_stamp ASC LIMIT 1;"""
     cursor.execute(sql_first_row)
     first_col = cursor.fetchall()[0]
 
@@ -51,7 +51,7 @@ def insert_data_to_table(conn, cursor, list_col, table_sql, tuple_data):
 
 
 if __name__ == "__main__":
-    with open("file/key.json", "r") as env:
+    with open(API_KEY, "r") as env:
         env_dict = json.load(env)
         host=env_dict['host']
         user=env_dict['user']
