@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  youtube-short-generator:
+    image: whisper_llm 
+    build: 
+      context: ./Youtube-Short-Generator
+      dockerfile: Dockerfile
+    volumes:
+      - ./Youtube-Short-Generator/models:/app/models
+      - shared-data:/app/videos 
+      - shared-data:/app/file 
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - YOUTUBE_LINK=${YOUTUBE_LINK}
+      - YOUTUBE_CATEGORY=${YOUTUBE_CATEGORY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            capabilities: [gpu]
+
+  clip4clip:
+    image: clip4clip 
+    build: 
+      context: ./clip4clip
+      dockerfile: Dockerfile
+    volumes:
+      - ./clip4clip/models:/app/models
+      - shared-data:/app/videos 
+      - shared-data:/app/file 
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - YOUTUBE_LINK=${YOUTUBE_LINK}
+    depends_on:
+      - youtube-short-generator
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            capabilities: [gpu]
+volumes:
+  shared-data:
