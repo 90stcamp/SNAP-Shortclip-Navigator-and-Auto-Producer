@@ -196,6 +196,7 @@ def wait_for_file(file_path, timeout=500, check_interval=5):
     return True
 
 if __name__=='__main__':
+    conn = dbs.MYSQL_DATABASE_CONN
     with open(SERVER_DIR, "r") as env:
         dic_server = json.load(env)
     server = dic_server['server']
