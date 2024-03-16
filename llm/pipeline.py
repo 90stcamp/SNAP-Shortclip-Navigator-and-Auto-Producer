@@ -33,6 +33,8 @@ logging.basicConfig(format='(%(asctime)s) %(levelname)s:%(message)s',
 if __name__ == '__main__':
     # youtube_id = "KOEfDvr4DcQ"
     # category="Entertainment"
+    conn = dbs.MYSQL_DATABASE_CONN
+    
     with open(SERVER_DIR, "r") as env:
         dic_server = json.load(env)
     server = dic_server['server']
