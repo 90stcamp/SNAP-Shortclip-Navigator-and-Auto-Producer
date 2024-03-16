@@ -28,11 +28,6 @@ from settings import *
 
 def send_data_to_server(dict_file,server):
     response = requests.post(server, json=dict_file, timeout=10)
-with open(SERVER_DIR, "r") as env:
-        dic_server = json.load(env)
-server = dic_server['server']
-
-conn = dbs.MYSQL_DATABASE_CONN
 
 
 def get_video_info(filepath):
@@ -201,9 +196,10 @@ def wait_for_file(file_path, timeout=500, check_interval=5):
     return True
 
 if __name__=='__main__':
-    with open("file/server.json", "r") as env:
+    with open(SERVER_DIR, "r") as env:
         dic_server = json.load(env)
     server = dic_server['server']
+
     youtube_link = os.getenv('YOUTUBE_LINK')
     logging.info("Process Started")
     video_id=youtube_link.split('watch?v=')[1]
