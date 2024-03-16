@@ -16,13 +16,8 @@ import dbs
 import requests
 from requests.exceptions import Timeout, RequestException
 
-conn = dbs.MYSQL_DATABASE_CONN
 def send_data_to_server(dict_file,server):
     response = requests.post(server, json=dict_file, timeout=10)
-
-with open(SERVER_DIR, "r") as env:
-        dic_server = json.load(env)
-server = dic_server['server']
 
 
 @contextmanager
@@ -41,6 +36,7 @@ if __name__ == '__main__':
     with open(SERVER_DIR, "r") as env:
         dic_server = json.load(env)
     server = dic_server['server']
+
     youtube_link = os.getenv('YOUTUBE_LINK')
     logging.info("Process Started")
     video_id=youtube_link.split('watch?v=')[1]
@@ -89,20 +85,10 @@ if __name__ == '__main__':
         matches = re.findall(r'\d+\..*?\n', output_llm)
         summarization = [match.split('.', 1)[1].strip() for match in matches]
 
-        # summarization = output_llm.split('\n')[:5]
-        # summarization = list(map(lambda x: x.strip(), summarization))
         # 완료 신호
         dict_file = {"video_id": video_id, "table": 2}
         send_data_to_server(dict_file,server)
         
-        # with conn.cursor() as cursor:
-        #     query = "INSERT INTO querys.LLM (youtube_id, topic_idx, summarization) VALUES (%s, %s, %s)"
-            
-        #     values = [(video_id, idx + 1, sum_) for idx, sum_ in enumerate(summarization)]
-        #     cursor.executemany(query, values)
-
-        #     cursor.execute(f"UPDATE querys.WEB SET stage=2 WHERE youtube_id='{video_id}'")
-        #     conn.commit()
         for idx, summ in enumerate(summarization):
             summ = summ.replace('"', "\'")
             with conn.cursor() as cursor:
@@ -123,18 +109,13 @@ if __name__ == '__main__':
         txt_llm=llmUtils.get_origin_text(output_llm)
 
         timeselect=[]
-        # timecand=scores.make_candidates(timestamps,20,1)
         timecand=scores.make_candidates(timestamps,section)
         script = []
         for idx in timecand:
             script.append(idx[0])
 
         logging.info("Process: Retrieve top-k timeline")
-        # for res in txt_llm:
-        #     timeselect.append(scores.retrieve_top_k_cosine(res, timecand))
-        
         Vectorizer = TfidfVectorizer().fit(script)
-
         corpusVec = Vectorizer.transform(script)
 
         results = []
@@ -150,8 +131,3 @@ if __name__ == '__main__':
         print(llm_score.shape)
 
         np.save(f'videos/{video_id}_llm_score.npy', llm_score)
-
-
-        
-        # audioUtils.save_text_json(timeselect,video_id+"_top")
-        # print(timeselect)
