@@ -218,7 +218,7 @@ if __name__=='__main__':
     save_video_frame(filepath, video, fps, 1) # 마지막은 몇 초에 한번 프레임을 생성할 것인지
     image_list = natsorted(glob.glob(f'{filepath[:-4]}/*.jpg'))
     #
-    threshold = 80
+    threshold = 75
     min_scene_len= fps*10 # fps * 시간
     scene_list = detect(filepath, ContentDetector(min_scene_len=min_scene_len, threshold=threshold))
     
@@ -253,11 +253,22 @@ if __name__=='__main__':
     print("LLM RESEULT\n",final_interval_llm)
     print('-' * 100)
 
-    dict_file = {"video_id": video_id, "table": 3}
+    dict_file = {"video_id": video_id, "table": 3, "interval_":final_interval_all}
     send_data_to_server(dict_file,server)
     
     with conn.cursor() as cursor:
         for idx, inter_ in enumerate(final_interval_all):
             f = f"""INSERT INTO querys.TIME_INTER (youtube_id, topic_idx, interval_) VALUES ("{video_id}", "{idx+1}", "{json.dumps(inter_)}")"""
             cursor.execute(f)
+        conn.commit()
+
+    with conn.cursor() as cursor:
+        for idx, inter_ in enumerate(final_interval_all):
+            f = f"""INSERT INTO youtube.TIME_INTER (youtube_id, topic_idx, interval_) VALUES ("{video_id}", "{idx+1}", "{json.dumps(inter_)}")"""
+            cursor.execute(f)
+        conn.commit()
+
+    with conn.cursor() as cursor:
+        f = f'DELETE FROM querys.WEB WHERE youtube_id = "{video_id}"'
+        cursor.execute(f)
         conn.commit()

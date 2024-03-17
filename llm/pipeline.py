@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # youtube_id = "KOEfDvr4DcQ"
     # category="Entertainment"
     conn = dbs.MYSQL_DATABASE_CONN
-    
+
     with open(SERVER_DIR, "r") as env:
         dic_server = json.load(env)
     server = dic_server['server']
@@ -44,6 +44,18 @@ if __name__ == '__main__':
     video_id=youtube_link.split('watch?v=')[1]
 
     category = os.getenv("YOUTUBE_CATEGORY")
+
+
+    with conn.cursor() as cursor:
+        f = f"""INSERT INTO querys.WEB (youtube_id, category) VALUES ("{video_id}", "{category}")"""
+        cursor.execute(f)
+        conn.commit()
+
+    with conn.cursor() as cursor:
+        f = f"""INSERT INTO youtube.WEB (youtube_id, category) VALUES ("{video_id}", "{category}")"""
+        cursor.execute(f)
+        conn.commit()
+
 
     with timer('Whisper Part'):
         logging.info(f"Video Category: {category}")
@@ -92,9 +104,18 @@ if __name__ == '__main__':
         send_data_to_server(dict_file,server)
         
         for idx, summ in enumerate(summarization):
-            summ = summ.replace('"', "\'")
+            # summ = summ.replace('"', "\'")
+            summ = re.sub('"', "\'", summ)
             with conn.cursor() as cursor:
                 f = f"""INSERT INTO querys.LLM (youtube_id, topic_idx, summarization) VALUES ("{video_id}", "{idx+1}", "{summ}")"""
+                print(f)
+                cursor.execute(f)
+                conn.commit()
+
+        for idx, summ in enumerate(summarization):
+            summ = re.sub('"', "\'", summ)
+            with conn.cursor() as cursor:
+                f = f"""INSERT INTO youtube.LLM (youtube_id, topic_idx, summarization) VALUES ("{video_id}", "{idx+1}", "{summ}")"""
                 cursor.execute(f)
                 conn.commit()
 
