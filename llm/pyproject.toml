@@ -25,6 +25,7 @@ rouge = "*"
 torch = "1.11.0"
 pymysql = "*"
 yt-dlp = "^2024.3.10"
+pynvml = "^11.5.0"
 
 [build-system]
 requires = ["poetry-core"]

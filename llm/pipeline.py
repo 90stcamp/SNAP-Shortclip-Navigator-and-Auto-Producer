@@ -154,3 +154,4 @@ if __name__ == '__main__':
         print(llm_score.shape)
 
         np.save(f'videos/{video_id}_llm_score.npy', llm_score)
+

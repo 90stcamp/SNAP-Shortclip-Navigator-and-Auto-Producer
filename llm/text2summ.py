@@ -16,6 +16,7 @@ from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.chains import MapReduceDocumentsChain, ReduceDocumentsChain
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo
 
 import torch
 import numpy as np
@@ -23,6 +24,9 @@ import numpy as np
 
 config = llmUtils.load_json(CONFIG_DIR)
 np.random.seed(2024)
+
+nvmlInit()
+handle = nvmlDeviceGetHandleByIndex(0)
 
 
 def get_dataset(lower,upper):
@@ -85,11 +89,13 @@ def create_map_reduce_chain(prompt, hf):
         )
     reduce_chain = LLMChain(llm=hf, prompt=reduce_template) 
 
+
     # reduce_chain에 전달할 문서 정의. 여러 문서를 하나로 결합하는 역할
     combine_documents_chain = StuffDocumentsChain(
         llm_chain=reduce_chain, 
         document_variable_name= "ext_sum" # (reduce_template 에 정의된 변수명)
     )
+
     # token_max를 넘어가면 문서를 결합하거나 분할하는 역할
     reduce_documents_chain = ReduceDocumentsChain(
         # map_chain들의 결과를 결합
@@ -118,9 +124,10 @@ def get_sum(text, prompt, hf):
         # tokenizer = tokenizer,
         separator= '\n',
         chunk_size = 1024,
-        chunk_overlap = 100,
+        chunk_overlap = 0,
         # length_function = my_tokenizer_func,
     )
+
     chain = create_map_reduce_chain(prompt, hf)
     split_docs = text_splitter.create_documents([text])
     # map reduce 과정 수행
