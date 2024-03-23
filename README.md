@@ -115,3 +115,4 @@ Run snap.sh <br>
 
 ## Release
 - `MAR, 23, 2024` Release the initial version of the SNAP model publicly.
+
