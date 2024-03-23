@@ -29,7 +29,7 @@ Below is an image demonstrating the demo service.
 
 ![Image20240321174417](https://github.com/90stcamp/SNAP-Shortclip-Navigator-and-Auto-Producer/assets/71856506/519e4933-99fc-42d5-b419-60c0b385d2bc)
 
-**Please note: This service is currently in a testing demo and comes with certain limitations:** <br>
+**Please note: This model comes with certain limitations:** <br>
 - Allowed categories: `Comedy`, `Education`, `Entertainment`, `News & Politics`
     - More categories will be added soon <br>
 - Language support: `English` <br>
