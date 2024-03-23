@@ -29,11 +29,16 @@ Below is an image demonstrating the demo service.
 
 ![Image20240321174417](https://github.com/90stcamp/SNAP-Shortclip-Navigator-and-Auto-Producer/assets/71856506/519e4933-99fc-42d5-b419-60c0b385d2bc)
 
+**Please note: This service is currently in a testing demo and comes with certain limitations:** <br>
+- Allowed categories: `Comedy`, `Education`, `Entertainment`, `News & Politics`
+    - More categories will be added soon <br>
+- Language support: `English` <br>
 
+[How can I check my youtube category?](https://techpostplus.com/how-to-find-youtube-video-category)
 
 ## Architecture
 
-![project pipeline (3)](https://github.com/90stcamp/SNAP-Shortclip-Navigator-and-Auto-Producer/assets/71856506/de62d2a1-4a39-44e7-ae72-d482052a269c)
+![project pipeline](https://github.com/90stcamp/SNAP-Shortclip-Navigator-and-Auto-Producer/assets/71856506/de62d2a1-4a39-44e7-ae72-d482052a269c)
 
 
 ### Structure
@@ -82,14 +87,31 @@ SNAP-Shortclip-Navigator-and-Auto-Producer
 
 ## Install
 
+Please follow the instructions below
+
+Clone this repository
+```shell
+git clone https://github.com/90stcamp/SNAP-Shortclip-Navigator-and-Auto-Producer.git
+```
+
+Create a Docker Compose setup that builds two Docker images <br>
+- One for the language model (LLM) and another for vision processing
+- Automatically install dependencies using Poetry.
+
+Run snap.sh <br>
+- Put your youtube link and category in .env <br>
 
 
 
 ## Evaluation
+- Will be released soon.
 
+## Examples
 
+![image](https://github.com/90stcamp/SNAP-Shortclip-Navigator-and-Auto-Producer/assets/71856506/a55e59d3-1e1b-4e31-9551-f81c921ee6c0)
 
-
+`youtube_link`: https://www.youtube.com/watch?v=KOEfDvr4DcQ <br>
+`category`: Entertainment
 
 ## Release
-- `MAR, 21, 2024` Release the initial version of the SNAP model publicly.
+- `MAR, 23, 2024` Release the initial version of the SNAP model publicly.

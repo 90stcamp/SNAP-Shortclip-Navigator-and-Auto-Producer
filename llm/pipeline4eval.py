@@ -90,7 +90,7 @@ def prompt_reduce_common_pick3():
     return template
 
 
-file_name = 'News&Politics_whisper'
+file_name = 'Science_whisper'
 
 if __name__ == '__main__':
     
