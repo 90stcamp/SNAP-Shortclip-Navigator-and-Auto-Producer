@@ -70,7 +70,6 @@ if __name__ == '__main__':
             script_time = audioUtils.change_timestamp_list_for_exist(timestamps)
         
         else:
-
             convertVideo2Audio(f"videos/{video_id}.mp4")
             logging.info("Download: Audio Completed")
 

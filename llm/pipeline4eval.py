@@ -41,9 +41,10 @@ os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"  # or ":16:8"
 
 #원래는 domainFlow.py에 위치
 def separate_reduce_common_domain(domain, text):
-    prompt=prompt_reduce_common_pick2()
+    prompt=prompt_reduce_common_pick3()
     return summarize_mapreduce(text, prompt)
 #원래는prompt.py위치
+
 def prompt_reduce_common_pick1():
     """
     Reduce prompt for all common domains to pick top scenes
@@ -77,24 +78,28 @@ def prompt_reduce_common_pick3():
     Reduce prompt for all common domains to pick top scenes
     """
     template = """
+
+
     <s>[INST]<>Please pick out the top 5 scenes that could be the most viewed moments or 'hot clips' from various parts of the script.
     The answer should follows format below.
 
-    Viewed Moments: {ext_sum}
+    Viewed Moments: {ext_sum}    
 
     <>[/INST]<\s>.
     """
     return template
 
 
+file_name = 'News&Politics_whisper'
 
 if __name__ == '__main__':
     
-    with open('heatmap_20.json' , 'r') as f:
+    with open(f'heatmap/{file_name}.json' , 'r') as f:
         heatmap = json.load(f)
         
     for topic in heatmap:
-        for i,info in enumerate(heatmap[topic]):
+        print(topic)
+        for i,info in enumerate(heatmap[topic][:3]):
             youtube_link,title,duration,svg,timestamps,script_time = info
             video_id=youtube_link.split('watch?v=')[1]
             print(topic, title)
@@ -103,19 +108,20 @@ if __name__ == '__main__':
                 logging.info("Process: Text Summarization")
                 torch.cuda.empty_cache()
                 output_llm=separate_reduce_common_domain(topic, script_time)
-                # output_llm=separate_reduce_common_domain(topic, script_time)
-                print(output_llm)
-                heatmap[topic][i].append(output_llm)
-                with open('heatmap_llm.json', 'w', encoding='utf-8') as file:
-                    json.dump(heatmap, file, ensure_ascii=False, indent=4)
-            if i >20:
-                break
-        #         # input “요약문 리스트 [문장1, 문장2, 문장3, 문장4, 문장5]”
-        #         matches = re.findall(r'\d+\..*?\n', output_llm)
-        #         summarization = [match.split('.', 1)[1].strip() for match in matches]
 
-        #         llmUtils.save_txt_summarize(output_llm,video_id)
-        #         logging.info("Download: Summarized txt Completed")
+                # output_llm=separate_reduce_common_domain(topic, script_time)
+                heatmap[topic][i].append(output_llm['intermediate_steps'])
+                heatmap[topic][i].append(output_llm['output_text'])
+                with open(f'output/{file_name}_llm.json', 'w', encoding='utf-8') as file:
+                    json.dump(heatmap, file, ensure_ascii=False, indent=4)
+                
+                
+                # input “요약문 리스트 [문장1, 문장2, 문장3, 문장4, 문장5]”
+                # matches = re.findall(r'\d+\..*?\n', output_llm)
+                # summarization = [match.split('.', 1)[1].strip() for match in matches]
+
+                # llmUtils.save_txt_summarize(output_llm,video_id)
+                # logging.info("Download: Summarized txt Completed")
 
         #     with timer('Retrieve part'):  
         #         logging.info("Process: Summ-Text top-k candidates")

@@ -76,7 +76,7 @@ def summarize_langchain(input, template):
     torch.cuda.empty_cache()
     return response
 
-def create_map_reduce_chain(prompt, hf):
+def create_map_reduce_chain(prompt, hf, return_map_results=False):
     map_template = PromptTemplate(
         template=prompts.prompt_extsum_paper2(),
         input_variables=["document"]
@@ -114,7 +114,7 @@ def create_map_reduce_chain(prompt, hf):
         reduce_documents_chain=reduce_documents_chain,
         document_variable_name="document", # (map_template 에 정의된 변수명)
         # Return the results of the map steps in the output
-        return_intermediate_steps=False,
+        return_intermediate_steps=return_map_results,
     )
     return map_reduce_chain
 
@@ -128,11 +128,14 @@ def get_sum(text, prompt, hf):
         # length_function = my_tokenizer_func,
     )
 
-    chain = create_map_reduce_chain(prompt, hf)
+    chain = create_map_reduce_chain(prompt, hf, return_map_results=True)
     split_docs = text_splitter.create_documents([text])
     # map reduce 과정 수행
     summarize_text = chain.invoke(split_docs)
-    return summarize_text['output_text']
+    # return summarize_text['output_text']
+    # return summarize_text['intermediate_steps']
+    return summarize_text
+
 
 def summarize_mapreduce(input, prompt):
     MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
@@ -146,7 +149,7 @@ def summarize_mapreduce(input, prompt):
     hf = HuggingFacePipeline(pipeline=pipe)
 
     response = get_sum(input, prompt, hf)
-    
+
     torch.cuda.empty_cache()
     return response
 
