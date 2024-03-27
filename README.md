@@ -36,10 +36,12 @@ Below is an image demonstrating the demo service.
 
 [How can I check my youtube category?](https://techpostplus.com/how-to-find-youtube-video-category)
 
-## Architecture
+## Model Architecture
 
-![project pipeline](https://github.com/90stcamp/SNAP-Shortclip-Navigator-and-Auto-Producer/assets/71856506/de62d2a1-4a39-44e7-ae72-d482052a269c)
+# ![image](https://github.com/90stcamp/SNAP-Shortclip-Navigator-and-Auto-Producer/assets/43094223/5df4ba49-b2d6-4e00-b687-b5e4e0edaa85)
 
+## Service Architecture
+# ![image](https://github.com/90stcamp/SNAP-Shortclip-Navigator-and-Auto-Producer/assets/43094223/a4bffdd1-d050-40af-98d0-95d3cd679891)
 
 ### Structure
 The folder structure should be organized as follows before launching.
